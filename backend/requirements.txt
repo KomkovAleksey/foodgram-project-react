@@ -1,0 +1,11 @@
+Django==4.2.3
+flake8==6.0.0
+django-colorfield==0.9.0
+django-filter==23.2
+djangorestframework==3.14.0
+drf-extra-fields==3.5.0
+djoser==2.2.0
+gunicorn==20.1.0
+psycopg2-binary==2.9.6
+Pillow==10.0.0
+python-dotenv==1.0.0

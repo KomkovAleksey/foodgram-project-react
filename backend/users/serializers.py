@@ -132,4 +132,3 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         """Получение общего количества рецептов,
          написанных  автором."""
         return obj.author.recipes.count()
-    

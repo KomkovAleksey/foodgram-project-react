@@ -107,11 +107,12 @@ class Recipe(models.Model):
         verbose_name='Время приготовления блюда в минутах.',
         default=1,
         help_text='Укажите время приготовления в минутах',
-        validators=[MinValueValidator(
-            1, 'Время приготовления должно быть >=1 минуте.', ),
+        validators=[
+            MinValueValidator(
+                1, 'Время приготовления должно быть >=1 минуте.'),
             MaxValueValidator(
-                6000, 'Время приготовления превышает все нормы!'
-            )],
+                6000, 'Время приготовления превышает все нормы!')
+        ],
     )
     pub_date = models.DateTimeField(
         'Дата публикации',
@@ -128,6 +129,7 @@ class Recipe(models.Model):
                 name='unique_author_name'
             ),
         )
+
     def __str__(self):
         return self.name
 

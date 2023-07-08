@@ -21,6 +21,7 @@ class IngredientsInRecipeInline(admin.TabularInline):
     model = Recipe.ingredients.through
     extra = 1
 
+
 @admin.register(IngredientsInRecipe)
 class IngredientsInRecipeAdmin(admin.ModelAdmin):
     """
@@ -36,6 +37,7 @@ class IngredientsInRecipeAdmin(admin.ModelAdmin):
     )
     search_fields = ('recipe__name', 'ingredient__name')
 
+
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     """ Представляет модель 'Tag' в интерфейсе администратора. """
@@ -49,6 +51,7 @@ class TagAdmin(admin.ModelAdmin):
     list_editable = ('color',)
     search_fields = ('name', 'color', 'slug')
 
+
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     """Представляет модель 'Ingredient' в интерфейсе администратора."""
@@ -60,6 +63,7 @@ class IngredientAdmin(admin.ModelAdmin):
     )
     search_fields = ('measurement_unit',)
     list_filter = ('measurement_unit',)
+
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
@@ -81,6 +85,7 @@ class RecipeAdmin(admin.ModelAdmin):
     def is_favorited(self, instance):
         return instance.favorite_recipes.count()
 
+
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     """Представляет модель 'Favorite' в интерфейсе администратора."""
@@ -95,6 +100,7 @@ class FavoriteAdmin(admin.ModelAdmin):
         'user__email',
         'recipe__name'
     )
+
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):

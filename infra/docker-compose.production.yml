@@ -1,37 +1,31 @@
 version: '3.8'
 
-name: devfood
+name: foodgram
+
+volumes:
+  static_value:
+  media_value:
+  db-data:
+
 
 services:
-
   db:
-    image: postgres:13.0-alpine
-    restart: always
-    env_file:  ../.env
+    image: postgres:13
+    env_file: .env
     volumes:
-      - db-data:/var/lib/postgresql/data/
-
+      - db-data:/var/lib/postgresql/data
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-    restart: always
-    env_file: ../.env
-    expose:
-      - 8000
+    image: alexkomkov/kittygram_backend
+    env_file: .env
     volumes:
       - static_value:/app/backend_static/
       - media_value:/app/backend_media/
-    depends_on:
-      - db
-
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: alexkomkov/kittygram_frontend
+    env_file: .env
+    command: cp -r /app/build/. /frontend_static/
     volumes:
       - ../frontend/:/app/result_build/
-
   nginx:
     image: nginx:1.19.3
     ports:
@@ -45,8 +39,3 @@ services:
     depends_on:
       - backend
       - frontend
-
-volumes:
-  static_value:
-  media_value:
-  db-data:

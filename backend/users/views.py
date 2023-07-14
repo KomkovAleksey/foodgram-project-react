@@ -7,7 +7,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.paginators import PageLimitPagination
+from api.v1.paginators import PageLimitPagination
 from .models import Subscription, User
 from .serializers import SubscribeSerializer, SubscriptionSerializer
 

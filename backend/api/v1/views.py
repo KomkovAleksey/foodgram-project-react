@@ -15,20 +15,9 @@ from .mixins import RetrieveListViewSet
 from .filters import IngredientFilter, TagFilter
 from .paginators import PageLimitPagination
 from .permissions import IsAuthorOrReadOnly, IsAdminUserOrReadOnly
-from .serializers import (AddRecipeSerializer,
-                          IngredientSerializer,
-                          RecipeSerializer,
-                          TagSerializer,
-                          ShortRecipeSerializer,
-                          )
+from .serializers import *
 
-from recipes.models import (Favorite,
-                            Ingredient,
-                            Tag,
-                            IngredientsInRecipe,
-                            Recipe,
-                            ShoppingCart,
-                            )
+from recipes.models import *
 
 
 class IngredientViewSet(RetrieveListViewSet):

@@ -40,6 +40,7 @@ class Tag(models.Model):
         unique=True,
         verbose_name='Название тега',
         help_text='Введите Название тега',
+        db_index=True,
     )
     color = ColorField(
         default='#FF0000',

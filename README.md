@@ -1,7 +1,8 @@
 # Foodgram_project 
 ### Описание:
 
-Foodgram это сайт где пользователи могут публикавать вкусные рецепты.
+Foodgram(«Продуктовый помощник») это кулинарный сайт, где пользователи могут публиковать свои рецепты,
+добавлять чужие рецепты в избранное и подписываться на публикации других авторов.
 
 ### Авторизованный пользователь может:
    - Входить в систему под своим логином и паролем.
@@ -37,7 +38,6 @@ Foodgram это сайт где пользователи могут публик
 - Nginx
 - Django 4.2.3
 - djangorestframework 3.14.0
-
 - postgres:13.0-alpine
 
 
@@ -57,8 +57,8 @@ cd foodgram
 ```
 git clone https://github.com/KomkovAleksey/foodgram-project-react
 ```
-* Создайте .env файл в корневой папке проекта.
-В файле должны быть указаны: 
+* Создайте .env файл в корневой папке проекта. 
+В нем должны быть указаны. 
 ```
 POSTGRES_USER=
 POSTGRES_PASSWORD=
@@ -68,6 +68,8 @@ DB_PORT=
 SECRET_KEY=
 ALLOWED_HOSTS=
 ```
+В корневой папке есть файл .env.example,
+с примером того как надо заполнять .env файл.
 ### Запуск проекта в dev-режиме
 * Поднимаем сеть контейнеров
 ```
@@ -76,13 +78,23 @@ docker compose up
 ```
 * В отдельном окне терминала выполните миграции, соберите статику  бэкенда и скопируйте её в /backend_static/static/:
 ```
+docker compose exec backend python manage.py makemigrations
 docker compose exec backend python manage.py migrate
 docker compose exec backend python manage.py collectstatic
 docker compose exec backend cp -r /app/collected_static/. /backend_static/static/
 ```
+* Наполните базу данных:
+```
+docker compose exec backend python manage.py import_ingredients_data
+docker compose exec backend python manage.py import_tags_data
+```
 * Проект доступен по адоесу:
 ```
 http://localhost:80/
+```
+* Cпецификация API:
+```
+http://localhost/api/docs/
 ```
 ### Запуск проекта на удаленном сервере:
 * Откройте терминал и подключитесь к вашему  удалённому серверу:
@@ -97,9 +109,9 @@ curl -fSL https://get.docker.com -o get-docker.sh
 sudo sh ./get-docker.sh
 sudo apt-get install docker-compose-plugin
 ```
-* Создайте папку kittygram
+* Создайте папку Foodgram:
 ```
-mkdir foodgram
+mkdir Foodgram
 ```
 * Скопируйте в папку файл docker-compose.production.yml:
 ```
@@ -128,6 +140,11 @@ sudo docker compose -f docker-compose.production.yml up -d
 sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
 sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
 sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
+```
+* Наполните базу данных:
+```
+docker compose exec backend python manage.py import_ingredients_data
+docker compose exec backend python manage.py import_tags_data
 ```
 * Откройте конфиг Nginx:
 ```

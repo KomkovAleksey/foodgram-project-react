@@ -6,13 +6,15 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (IngredientViewSet,
-                    RecipeViewSet,
-                    TagViewSet,)
+                   RecipeViewSet,
+                   TagViewSet, )
 
 app_name = 'api'
 
 
 router_v1 = DefaultRouter()
+
+# Foodgram API v.1
 
 router_v1.register('tags', TagViewSet, basename='tags')
 router_v1.register('ingredients', IngredientViewSet, basename='ingredients')

@@ -1,118 +1,82 @@
 """
-Registering models in the 'recipes' admin interface.
+Module for registering 'recipe' app models in the admin interface.
 """
 from django.contrib import admin
 
-from recipes.models import (Favorite,
-                            Ingredient,
-                            Tag,
-                            IngredientsInRecipe,
-                            Recipe,
-                            ShoppingCart,
-                            )
+from .models import (Tag,
+                     Ingredient,
+                     Recipe,
+                     IngredientInRecipe,
+                     ShoppingCart,
+                     Favorite,
+                     )
 
 
 class IngredientsInRecipeInline(admin.TabularInline):
-    """
-    класс для отображения и управления
-    отношением "многие-ко-многим"
-    между моделью Recipe и моделью Ingredients
-    """
-    model = Recipe.ingredients.through
+
+    model = IngredientInRecipe
     extra = 1
 
 
-@admin.register(IngredientsInRecipe)
+@admin.register(IngredientInRecipe)
 class IngredientsInRecipeAdmin(admin.ModelAdmin):
-    """
-    Представляет модель 'IngredientsInRecipe'
-    в интерфейсе администратора.
-    """
+    """ Represents the 'IngredientsRecipe' model in the admin interface. """
 
-    list_display = (
-        'pk',
-        'ingredient',
-        'recipe',
-        'amount'
-    )
-    search_fields = ('recipe__name', 'ingredient__name')
+    list_display = ('pk', 'ingredient', 'recipe', 'amount',)
+    list_filter = ('ingredient', 'recipe',)
+    search_fields = ('recipe', 'ingredient',)
+    empty_value_display = '-empty-'
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    """ Представляет модель 'Tag' в интерфейсе администратора. """
+    """ Represents the 'Tag' model in the admin interface. """
 
-    list_display = (
-        'pk',
-        'name',
-        'color',
-        'slug'
-    )
-    list_editable = ('color',)
-    search_fields = ('name', 'color', 'slug')
+    list_display = ('pk', 'name', 'color', 'slug',)
+    list_filter = ('name', 'color',)
+    search_fields = ('name',)
+    empty_value_display = '-empty-'
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    """Представляет модель 'Ingredient' в интерфейсе администратора."""
+    """ Represents the 'Ingredient' model in the admin interface. """
 
-    list_display = (
-        'pk',
-        'name',
-        'measurement_unit',
-    )
-    search_fields = ('measurement_unit',)
-    list_filter = ('measurement_unit',)
+    list_display = ('pk', 'name', 'measurement_unit',)
+    search_fields = ('name',)
+    list_filter = ('name',)
+    empty_value_display = '-empty-'
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    """Представляет модель 'Recipe' в интерфейсе администратора."""
+    """ Represents the 'Recipe' model in the admin interface. """
 
     inlines = (IngredientsInRecipeInline,)
-    list_display = (
-        'pk',
-        'name',
-        'author'
-    )
-    search_fields = (
-        'name',
-        'author__username',
-        'author__email'
-    )
-    readonly_fields = ('is_favorited',)
+    list_display = ('pk', 'name', 'author', 'num_recipe_was_in_fav',)
+    search_fields = ('name', 'author', 'tags',)
+    list_filter = ('name', 'author', 'tags')
+    empty_value_display = '-empty-'
 
-    def is_favorited(self, instance):
+    def num_recipe_was_in_fav(self, instance):
+        """
+        Shows the total number of times
+        this recipe has been added to favorites.
+        """
         return instance.favorite_recipes.count()
 
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
-    """Представляет модель 'Favorite' в интерфейсе администратора."""
+    """ Represents the 'Favorite' model in the admin interface """
 
-    list_display = (
-        'pk',
-        'user',
-        'recipe'
-    )
-    search_fields = (
-        'user__username',
-        'user__email',
-        'recipe__name'
-    )
+    list_display = ('pk', 'user', 'recipe',)
+    empty_value_display = '-empty-'
 
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    """Представляет модель 'ShoppingCart' в интерфейсе администратора."""
+    """ Represents the 'ShoppingCart' model in the admin interface. """
 
-    list_display = (
-        'pk',
-        'user',
-        'recipe'
-    )
-    search_fields = (
-        'user__username',
-        'user__email',
-        'recipe__name'
-    )
+    list_display = ('pk', 'user', 'recipe',)
+    empty_value_display = '-empty-'

@@ -1,5 +1,5 @@
 """
-'foodgram' URL Configuration
+URL configuration for foodgram project.
 """
 from django.conf import settings
 from django.conf.urls.static import static
@@ -9,8 +9,8 @@ from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/', include('api.v1.urls'), name='api'),
-    path('users/', include('users.urls'), name='users'),
+    path('api/', include('api.v1.urls'), name='api'),
+    path('api/', include('users.urls'), name='users'),
 ]
 
 if settings.DEBUG:

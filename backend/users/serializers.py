@@ -1,96 +1,127 @@
 """
-`users` application serializers.
+Module for creating, configuring and managing 'users' app serializers
 """
-from djoser.serializers import UserSerializer
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
+from rest_framework.relations import SlugRelatedField
+from rest_framework.validators import UniqueTogetherValidator
 
-import api
-from recipes.models import Recipe
-from .models import Subscription, User
+from .models import CustomUser, Subscribe
+from ..recipes.models import Recipe
 
 
-class CurrentUserSerializer(UserSerializer):
-    """сериализатор для модели `User`."""
+class CustomUserCreateSerializer(UserCreateSerializer):
+    """ Serializer for model 'CustomUser' on POST requests. """
 
-    is_subscribed = serializers.SerializerMethodField(
-        method_name='get_is_subscribed'
-    )
-
-    class Meta:
-        model = User
+    class Meta(UserCreateSerializer.Meta):
+        model = CustomUser
         fields = (
             'email',
-            'id',
             'username',
             'first_name',
             'last_name',
-            'is_subscribed'
+            'password',
+            )
+
+
+class CustomUserSerializer(UserSerializer):
+    """ Serializer for model 'CustomUser'. """
+
+    is_subscribed = serializers.SerializerMethodField(
+        method_name='get_is_subscribed',
+        read_only=True,
         )
 
-    def get_is_subscribed(self, obj):
-        """Метод проверяет, аутентифицирован ли пользователь"""
+    class Meta:
+        model = CustomUser
+        fields = (
+            'id',
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'password',
+            'is_subscribed',
+            )
 
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
+    def get_is_subscribed(self, obj):
+        """ Checking a user's subscription to other users. """
+        user = self.context.get('request').user
+        if user.is_anonymous:
             return False
-        return Subscription.objects.filter(
-            user=request.user, author=obj
-        ).exists()
+
+        return Subscribe.objects.filter(user=user, author=obj).exists()
+
+    def validate(self, data):
+        """ Checking if there is a user with the same username. """
+        if CustomUser.object.filters(username=data.get('username')
+                                     ).exists():
+            raise serializers.ValidationError(
+                'A user with the same username already exists!'
+            )
+
+        return super().validate(data)
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
-    """ Сериализатор для модели `Subscribe`. """
+    """ Serializer for model 'Subscribe'. """
 
-    class Meta:
-        model = Subscription
-        fields = ('user', 'author')
+    user = SlugRelatedField(
+        slug_field='username',
+        default=serializers.CurrentUserDefault(),
+        many=False,
+        read_only=True,
+    )
 
-    def to_representation(self, instance):
-        """Метод создает экземпляр сериализатора `SubscriptionSerializer`,
-         передавая ему экземпляр подписки и контекст запроса.
-          Затем он возвращает сериализованные данные."""
+    following = SlugRelatedField(
+        slug_field='username',
+        many=False,
+        queryset=CustomUser.objects.all(),
+    )
 
-        request = self.context.get('request')
-        context = {'request': request}
-        serializer = SubscriptionSerializer(
-            instance,
-            context=context
-        )
-        return serializer.data
+    class meta:
+        model = Subscribe
+        fields = ('user', 'following',)
+        read_only_fields = ('user',)
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Subscribe.objects.all(),
+                fields=('user', 'following'),
+                message='You are already subscribed.'
+            )
+        ]
 
     def validate(self, data):
-        """Проверка подписки пользоввателя."""
-        user = data.get('user')
-        author = data.get('author')
-        if user == author:
+        """ Checking your subscription to yourself. """
+        if self.context['request'].user == data['following']:
             raise serializers.ValidationError(
-                'Нельзя подписаться на самого себя!'
+                "You can't subscribe to yourself."
             )
-        if Subscription.objects.filter(user=user, author=author).exists():
-            raise serializers.ValidationError(
-                'Вы уже подписаны на этого пользователя!'
-            )
-        return data
+
+        return super().validate(data)
+
+
+class ShortRecipeSerializer(serializers.ModelSerializer):
+    """ Shortened recipe serializer. """
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели `Subscription`"""
+    """ Serializer about user-created subscriptions and recipes. """
 
-    email = serializers.ReadOnlyField(source='author.email')
-    id = serializers.ReadOnlyField(source='author.id')
-    username = serializers.ReadOnlyField(source='author.username')
-    first_name = serializers.ReadOnlyField(source='author.first_name')
-    last_name = serializers.ReadOnlyField(source='author.last_name')
+    recipes = ShortRecipeSerializer(many=True, read_only=True)
     is_subscribed = serializers.SerializerMethodField(
         method_name='get_is_subscribed'
-    )
-    recipes = serializers.SerializerMethodField(method_name='get_recipes')
+        )
     recipes_count = serializers.SerializerMethodField(
         method_name='get_recipes_count'
     )
 
     class Meta:
-        model = Subscription
+        model = CustomUser
         fields = (
             'email',
             'id',
@@ -103,32 +134,13 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        """
-        Функция проверяет, существует ли
-        подписка пользователя на данного автора.
-        """
-        request = self.context.get('request')
-        return Subscription.objects.filter(
-            author=obj.author, user=request.user
-        ).exists()
+        """ Checking a user's subscription to other users. """
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
 
-    def get_recipes(self, obj):
-        """Получение списка рецептов, написанных автором."""
-
-        request = self.context.get('request')
-        if request.GET.get('recipe_limit'):
-            recipe_limit = int(request.GET.get('recipe_limit'))
-            queryset = Recipe.objects.filter(
-                author=obj.author)[:recipe_limit]
-        else:
-            queryset = Recipe.objects.filter(
-                author=obj.author)
-        serializer = api.serializers.ShortRecipeSerializer(
-            queryset, read_only=True, many=True
-        )
-        return serializer.data
+        return Subscribe.objects.filter(user=user, author=obj).exists()
 
     def get_recipes_count(self, obj):
-        """Получение общего количества рецептов,
-         написанных  автором."""
+        """Getting the total number of recipes, written by the user. """
         return obj.author.recipes.count()

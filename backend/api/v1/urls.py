@@ -1,20 +1,17 @@
 """
-'api' URL Configuration
+Module for 'api' app routes
 """
+from rest_framework.routers import SimpleRouter
+
 from django.urls import include, path
 
-from rest_framework.routers import DefaultRouter
-
-from .views import (IngredientViewSet,
-                   RecipeViewSet,
-                   TagViewSet, )
+from .views import IngredientViewSet, TagViewSet, RecipeViewSet
 
 app_name = 'api'
 
+router_v1 = SimpleRouter()
 
-router_v1 = DefaultRouter()
-
-# Foodgram API v.1
+# foodgram router_v1 API v.1
 
 router_v1.register('tags', TagViewSet, basename='tags')
 router_v1.register('ingredients', IngredientViewSet, basename='ingredients')

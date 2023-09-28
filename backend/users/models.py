@@ -1,56 +1,68 @@
 """
-Application model configuration 'users'.
+Module for creating, configuring and managing `users' app models.
 """
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class User(AbstractUser):
-    """ Модель пользователя. """
+class CustomUser(AbstractUser):
+    """ CustomUser model class """
 
     email = models.EmailField(
-        unique=True,
-        max_length=254,
-        verbose_name='email',
-        help_text='Введите адрес электронной почты'
+        verbose_name='Email',
+        max_length=20,
+        unique=True
+    )
+    password = models.CharField(
+        verbose_name='Password',
+        max_length=20,
+        blank=False,
+        null=False,
     )
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password']
 
     class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
+        ordering = ('username',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'],
+                name='unique_username_email'
+            )
+        ]
 
     def __str__(self):
-        return self.username
+        return f'{self.get_full_name()}: {self.email}'
 
 
-class Subscription(models.Model):
-    """Моделью подписки одного пользователя на другого. """
+class Subscribe(models.Model):
+    """ Model of Subscribe of one user to another. """
 
     user = models.ForeignKey(
-        User,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='follower',
-        verbose_name='Подписчик',
+        verbose_name='Subscriber',
     )
-    author = models.ForeignKey(
-        User,
+    following = models.ForeignKey(
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='following',
-        verbose_name='Отслеживаемый автор'
+        verbose_name='Tracked user',
     )
 
     class Meta:
         constraints = (
             models.UniqueConstraint(
-                fields=('user', 'author'),
-                name='unique_following'
+                fields=['following', 'user'],
+                name='unique_follow'
             ),
         )
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
+        verbose_name = 'Subscription'
+        verbose_name_plural = 'Subscriptions'
 
     def __str__(self):
-        return f'{self.user} follows {self.author}'
+        return f'{self.user.username} follows the {self.author.username}'

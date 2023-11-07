@@ -1,64 +1,123 @@
 """
-Module for registering 'recipe' app models in the admin interface.
+Module for registering "recipe" app models in the admin interface.
 """
 from django.contrib import admin
 
-from .models import (Tag,
-                     Ingredient,
-                     Recipe,
-                     IngredientInRecipe,
-                     ShoppingCart,
-                     Favorite,
-                     )
+from .models import (
+    Tag,
+    Ingredient,
+    Recipe,
+    IngredientInRecipe,
+    ShoppingCart,
+    Favorite,
+)
+
+admin.site.site_header = (
+    'Administration of the "recipes" app for "foodgram" project.'
+)
+
+admin.site.empty_value_display = '-empty-'
 
 
-class IngredientsInRecipeInline(admin.TabularInline):
+class IngredientsInRecipeInline(admin.StackedInline):
+    """
+    Class for display and control
+    many-to-many relationship
+    between the Recipe model
+    and the Ingredient model.
+    """
 
     model = IngredientInRecipe
     extra = 1
 
 
 @admin.register(IngredientInRecipe)
-class IngredientsInRecipeAdmin(admin.ModelAdmin):
-    """ Represents the 'IngredientsRecipe' model in the admin interface. """
+class IngredientInRecipeAdmin(admin.ModelAdmin):
+    """Represents the "IngredientsRecipe" model in the admin interface."""
 
-    list_display = ('pk', 'ingredient', 'recipe', 'amount',)
-    list_filter = ('ingredient', 'recipe',)
-    search_fields = ('recipe', 'ingredient',)
-    empty_value_display = '-empty-'
+    list_display = (
+        'ingredient',
+        'recipe',
+        'amount',
+    )
+    list_filter = (
+        'ingredient',
+        'recipe',
+    )
+    search_fields = (
+        'recipe',
+        'ingredient',
+    )
+    ordering = (
+        'id',
+    )
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    """ Represents the 'Tag' model in the admin interface. """
+    """Represents the "Tag" model in the admin interface."""
 
-    list_display = ('pk', 'name', 'color', 'slug',)
-    list_filter = ('name', 'color',)
-    search_fields = ('name',)
-    empty_value_display = '-empty-'
+    list_display = (
+        'name',
+        'color',
+        'slug',
+    )
+    list_filter = (
+        'name',
+    )
+    search_fields = (
+        'name',
+        'slug',
+    )
+    ordering = (
+        'name',
+    )
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    """ Represents the 'Ingredient' model in the admin interface. """
+    """Represents the "Ingredient" model in the admin interface."""
 
-    list_display = ('pk', 'name', 'measurement_unit',)
-    search_fields = ('name',)
-    list_filter = ('name',)
-    empty_value_display = '-empty-'
+    list_display = (
+        'name',
+        'measurement_unit',
+    )
+    search_fields = (
+        'name',
+    )
+    list_filter = (
+        'name',
+    )
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    """ Represents the 'Recipe' model in the admin interface. """
+    """Represents the "Recipe" model in the admin interface."""
 
-    inlines = (IngredientsInRecipeInline,)
-    list_display = ('pk', 'name', 'author', 'num_recipe_was_in_fav',)
-    search_fields = ('name', 'author', 'tags',)
-    list_filter = ('name', 'author', 'tags')
-    empty_value_display = '-empty-'
+    inlines = (
+        IngredientsInRecipeInline,
+    )
+    list_display = (
+        'name',
+        'author',
+        'get_favorites',
+    )
+    search_fields = (
+        'name',
+        'author',
+        'tags',
+    )
+    list_filter = (
+        'name',
+        'author',
+        'tags',
+    )
+    filter_horizontal = (
+        'tags',
+        'ingredients',
+    )
 
-    def num_recipe_was_in_fav(self, instance):
+    def get_favorites(self, instance):
         """
         Shows the total number of times
         this recipe has been added to favorites.
@@ -68,15 +127,39 @@ class RecipeAdmin(admin.ModelAdmin):
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
-    """ Represents the 'Favorite' model in the admin interface """
+    """Represents the "Favorite" model in the admin interface."""
 
-    list_display = ('pk', 'user', 'recipe',)
-    empty_value_display = '-empty-'
+    list_display = (
+        'user',
+        'recipe',
+    )
+    list_filter = (
+        'user',
+        'recipe',
+    )
+    search_fields = (
+        'user',
+    )
+    ordering = (
+        'id',
+    )
 
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
-    """ Represents the 'ShoppingCart' model in the admin interface. """
+    """Represents the "ShoppingCart" model in the admin interface."""
 
-    list_display = ('pk', 'user', 'recipe',)
-    empty_value_display = '-empty-'
+    list_display = (
+        'user',
+        'recipe',
+    )
+    list_filter = (
+        'user',
+        'recipe',
+    )
+    search_fields = (
+        'user',
+    )
+    ordering = (
+        'id',
+    )

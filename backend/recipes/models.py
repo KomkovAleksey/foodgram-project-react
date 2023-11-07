@@ -2,24 +2,28 @@
 Module for creating, configuring and managing `recipe' app models.
 """
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth import get_user_model
 from django.db import models
 
 from colorfield.fields import ColorField
 
-from users.models import CustomUser
+
+User = get_user_model()
 
 
 class Ingredient(models.Model):
-    """ Ingredient model. """
+    """Ingredient model."""
 
     name = models.CharField(
-        max_length=200,
+        max_length=256,
         verbose_name='Ingredient name',
         db_index=True,
+        help_text='Enter a unique ingredient name.',
     )
     measurement_unit = models.CharField(
-        max_length=200,
+        max_length=256,
         verbose_name='Measurement unit',
+        help_text='Enter the unit of measurement for the ingredient.',
     )
 
     class Meta:
@@ -32,23 +36,26 @@ class Ingredient(models.Model):
 
 
 class Tag(models.Model):
-    """ Tag model. """
+    """Tag model."""
 
     name = models.CharField(
-        max_length=200,
+        max_length=256,
         unique=True,
         verbose_name='Tag name',
+        help_text='Enter a unique tag name.',
     )
     color = ColorField(
         default='#FF0000',
-        max_length=200,
+        max_length=256,
         verbose_name='Tag color',
         unique=True,
+        help_text='Select a tag color.',
     )
     slug = models.SlugField(
-        max_length=200,
+        max_length=64,
         unique=True,
         verbose_name='Tag slug',
+        help_text='Enter a unique tag slug.',
     )
 
     class Meta:
@@ -61,30 +68,36 @@ class Tag(models.Model):
 
 
 class Recipe(models.Model):
-    """ Recipe model. """
+    """Recipe model."""
 
     name = models.CharField(
         max_length=200,
         verbose_name='Recipe name',
+        help_text='Enter a unique recipe name.',
     )
     author = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         related_name='recipes',
         verbose_name='Recipe author',
+        help_text='Enter the unique name of the recipe author.',
     )
     image = models.ImageField(
-        upload_to='recipes/',
+        upload_to='recipes/images/',
         verbose_name='Recipe image',
+        blank=True,
+        help_text='Add a recipe image.',
     )
     text = models.TextField(
         verbose_name='Recipe description',
+        help_text='Add a recipe description.',
     )
     tags = models.ManyToManyField(
         Tag,
         db_index=True,
         related_name='recipes',
         verbose_name='Recipe tags',
+        help_text='Add recipe tags.',
     )
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -92,6 +105,7 @@ class Recipe(models.Model):
         through='IngredientInRecipe',
         through_fields=('recipe', 'ingredient'),
         verbose_name='Ingredients in the recipe.',
+        help_text='Add ingredients to recipe.',
     )
     cooking_time = models.IntegerField(
         blank=False,
@@ -103,23 +117,28 @@ class Recipe(models.Model):
             MaxValueValidator(
                 6000, 'Cooking time exceeds all norms!')
         ],
-    )
-    pub_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Recipe publication date.',
+        help_text=(
+            'Enter the cooking time for the recipe in minutes.'
+        ),
     )
 
     class Meta:
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
-        ordering = ('-pub_date',)
+        ordering = ('-name',)
+        constraints = (
+            models.UniqueConstraint(
+                fields=('name', 'author'),
+                name='unique_author_of_the_recipe',
+            ),
+        )
 
     def __str__(self):
-        return self.name
+        return f'{self.name}:{self.author.username}'
 
 
 class IngredientInRecipe(models.Model):
-    """ Relationship model between recipe and ingredient models. """
+    """Relationship model between "recipe" and "ingredient" models."""
 
     recipe = models.ForeignKey(
         Recipe,
@@ -156,10 +175,10 @@ class IngredientInRecipe(models.Model):
 
 
 class Favorite(models.Model):
-    """ Favorites model. """
+    """Favorites model."""
 
     user = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         related_name='favorites',
         verbose_name='User',
@@ -167,8 +186,8 @@ class Favorite(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='users_favorites',
-        verbose_name="Recipe from the user's favorites.",
+        related_name='user_favorites_list',
+        verbose_name="Recipe from the user's favorite list.",
     )
 
     class Meta:
@@ -182,14 +201,14 @@ class Favorite(models.Model):
         )
 
     def __str__(self):
-        return f'{self.recipe} from {self.user} favorites'
+        return f'{self.recipe} from {self.user} favorites list'
 
 
 class ShoppingCart(models.Model):
-    """ ShoppingCart model. """
+    """ShoppingCart model."""
 
     user = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         related_name='shopping_cart',
         verbose_name='User',
@@ -197,8 +216,8 @@ class ShoppingCart(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='shopping_cart',
-        verbose_name="Recipe from a user's shopping cart.",
+        related_name='user_shopping_cart',
+        verbose_name="Recipe from the user's shopping cart.",
     )
 
     class Meta:

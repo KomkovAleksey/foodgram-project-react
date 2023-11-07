@@ -6,27 +6,50 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
-    """ CustomUser model class """
+    """CustomUser model class."""
 
     email = models.EmailField(
         verbose_name='Email',
-        max_length=20,
-        unique=True
+        max_length=254,
+        unique=True,
+        help_text="Enter the user's unique email address.",
+    )
+    username = models.CharField(
+        verbose_name='Username',
+        max_length=150,
+        unique=True,
+        help_text='Enter a unique username.',
+    )
+    first_name = models.CharField(
+        verbose_name='Name',
+        max_length=150,
+        help_text='Enter your name.',
+    )
+    last_name = models.CharField(
+        verbose_name='Surname',
+        max_length=150,
+        help_text='Enter your last name.',
     )
     password = models.CharField(
         verbose_name='Password',
-        max_length=20,
+        max_length=50,
         blank=False,
         null=False,
+        help_text='Enter your unique user password.',
     )
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password']
+    REQUIRED_FIELDS = [
+        'username',
+        'first_name',
+        'last_name',
+        'password',
+    ]
 
     class Meta:
         verbose_name = 'User'
         verbose_name_plural = 'Users'
-        ordering = ('username',)
+        ordering = ('-username',)
         constraints = [
             models.UniqueConstraint(
                 fields=['username', 'email'],
@@ -38,26 +61,26 @@ class CustomUser(AbstractUser):
         return f'{self.get_full_name()}: {self.email}'
 
 
-class Subscribe(models.Model):
-    """ Model of Subscribe of one user to another. """
+class Follow(models.Model):
+    """Subscribe to another user model."""
 
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='follower',
+        related_name='subscribed_user',
         verbose_name='Subscriber',
     )
-    following = models.ForeignKey(
+    author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='following',
-        verbose_name='Tracked user',
+        related_name='author_followers',
+        verbose_name='Author',
     )
 
     class Meta:
         constraints = (
             models.UniqueConstraint(
-                fields=['following', 'user'],
+                fields=['author', 'user'],
                 name='unique_follow'
             ),
         )

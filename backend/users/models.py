@@ -2,6 +2,7 @@
 Module for creating, configuring and managing `users' app models.
 """
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -43,7 +44,6 @@ class CustomUser(AbstractUser):
         'username',
         'first_name',
         'last_name',
-        'password',
     ]
 
     class Meta:
@@ -67,13 +67,13 @@ class Follow(models.Model):
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='subscribed_user',
+        related_name='follower',
         verbose_name='Subscriber',
     )
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='author_followers',
+        related_name='following',
         verbose_name='Author',
     )
 
@@ -86,6 +86,15 @@ class Follow(models.Model):
         )
         verbose_name = 'Subscription'
         verbose_name_plural = 'Subscriptions'
+
+    def clean(self):
+        """Subscription validation."""
+        if self.user == self.following:
+            raise ValidationError("You can't subscribe to yourself.")
+        if Follow.objects.filter(
+                user=self.user, following=self.following).exists():
+            raise ValidationError("You can't subscribe twice.")
+        return super().save(self)
 
     def __str__(self):
         return f'{self.user.username} follows the {self.author.username}'

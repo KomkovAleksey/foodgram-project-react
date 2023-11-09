@@ -33,7 +33,9 @@ class Command(BaseCommand):
                         name=row[0],
                         measurement_unit=row[1]
                     )
-            self.stdout.write(self.style.SUCCESS('***Ingredient data loaded!***'))
+            self.stdout.write(
+                self.style.SUCCESS('***Ingredient data loaded!***')
+            )
         else:
             self.stdout.write(
                 self.style.ERROR('***File ingredients.csv not found!***')

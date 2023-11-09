@@ -93,7 +93,9 @@ class Follow(models.Model):
             raise ValidationError("You can't subscribe to yourself.")
         if Follow.objects.filter(
                 user=self.user, following=self.following).exists():
-            raise ValidationError("You can't subscribe twice.")
+            raise ValidationError(
+                'You cannot subscribe to the same author twice.'
+            )
         return super().save(self)
 
     def __str__(self):

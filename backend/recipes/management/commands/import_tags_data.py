@@ -35,4 +35,6 @@ class Command(BaseCommand):
                     )
             self.stdout.write(self.style.SUCCESS('***Tag data loaded!***'))
         else:
-            self.stdout.write(self.style.ERROR('***File tags.csv not found!***'))
+            self.stdout.write(
+                self.style.ERROR('***File tags.csv not found!***')
+            )

@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -23,8 +22,6 @@ DEBUG = 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(' ')
 
-
-# Application definition
 
 INSTALLED_APPS = [
     # DJANGO_APPS
@@ -83,9 +80,6 @@ WSGI_APPLICATION = "foodgram_backend.wsgi.application"
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
 if not DEBUG:
     DATABASES = {
         "default": {
@@ -105,9 +99,6 @@ else:
         }
     }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -146,7 +137,6 @@ DJOSER = {
     "HIDE_USERS": False,
 
     "SERIALIZERS": {
-        "user_create": "users.serializers.CustomUserCreateSerializer",
         "user": "users.serializers.CustomUserSerializer",
         "current_user": "users.serializers.CustomUserSerializer",
     },
@@ -156,8 +146,6 @@ DJOSER = {
         "user_list": ["rest_framework.permissions.IsAuthenticatedOrReadOnly"],
     },
 }
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
@@ -168,9 +156,6 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
 STATIC_URL = '/backend_static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'backend_static/')
 
@@ -179,8 +164,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'backend_media/')
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

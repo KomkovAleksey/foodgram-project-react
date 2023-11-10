@@ -50,7 +50,7 @@ class CustomUserAdmin(admin.ModelAdmin):
 
     @admin.display(description='Number of followers')
     def follower_count(self, obj):
-        return obj.author_followers.count()
+        return obj.following.count()
 
 
 @admin.register(Follow)

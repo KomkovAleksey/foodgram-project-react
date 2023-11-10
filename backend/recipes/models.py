@@ -4,8 +4,10 @@ Module for creating, configuring and managing `recipe' app models.
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth import get_user_model
 from django.db import models
-
+from django.utils.html import format_html
 from colorfield.fields import ColorField
+
+from core.constants import Help_text_recipes
 
 
 User = get_user_model()
@@ -18,18 +20,24 @@ class Ingredient(models.Model):
         max_length=256,
         verbose_name='Ingredient name',
         db_index=True,
-        help_text='Enter a unique ingredient name.',
+        help_text=Help_text_recipes.INGREDIENT_NAME,
     )
     measurement_unit = models.CharField(
         max_length=256,
         verbose_name='Measurement unit',
-        help_text='Enter the unit of measurement for the ingredient.',
+        help_text=Help_text_recipes.MEASUREMENT_UNIT,
     )
 
     class Meta:
         verbose_name = 'Ingredient'
         verbose_name_plural = 'Ingredients'
         ordering = ('name',)
+        constraints = (
+            models.UniqueConstraint(
+                fields=('name', 'measurement_unit'),
+                name='unique_ingredient_name_and_measurement_unit',
+            ),
+        )
 
     def __str__(self):
         return self.name
@@ -42,20 +50,19 @@ class Tag(models.Model):
         max_length=256,
         unique=True,
         verbose_name='Tag name',
-        help_text='Enter a unique tag name.',
+        help_text=Help_text_recipes.TAG_NAME,
     )
     color = ColorField(
         default='#FF0000',
-        max_length=256,
-        verbose_name='Tag color',
+        verbose_name='Hex color',
         unique=True,
-        help_text='Select a tag color.',
+        help_text=Help_text_recipes.TAG_COLOR,
     )
     slug = models.SlugField(
         max_length=64,
         unique=True,
         verbose_name='Tag slug',
-        help_text='Enter a unique tag slug.',
+        help_text=Help_text_recipes.TAG_SLUG,
     )
 
     class Meta:
@@ -73,31 +80,30 @@ class Recipe(models.Model):
     name = models.CharField(
         max_length=200,
         verbose_name='Recipe name',
-        help_text='Enter a unique recipe name.',
+        help_text=Help_text_recipes.RECIPE_NAME,
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='recipes',
         verbose_name='Recipe author',
-        help_text='Enter the unique name of the recipe author.',
+        help_text=Help_text_recipes.RECIPE_AUTHOR,
     )
     image = models.ImageField(
         upload_to='recipes/images/',
         verbose_name='Recipe image',
         blank=True,
-        help_text='Add a recipe image.',
     )
     text = models.TextField(
         verbose_name='Recipe description',
-        help_text='Add a recipe description.',
+        help_text=Help_text_recipes.RECIPE_TEXT,
     )
     tags = models.ManyToManyField(
         Tag,
         db_index=True,
         related_name='recipes',
         verbose_name='Recipe tags',
-        help_text='Add recipe tags.',
+        help_text=Help_text_recipes.RECIPE_TAG,
     )
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -105,7 +111,7 @@ class Recipe(models.Model):
         through='IngredientInRecipe',
         through_fields=('recipe', 'ingredient'),
         verbose_name='Ingredients in the recipe.',
-        help_text='Add ingredients to recipe.',
+        help_text=Help_text_recipes.RECIPE_INGREDIENT,
     )
     cooking_time = models.IntegerField(
         blank=False,
@@ -117,21 +123,22 @@ class Recipe(models.Model):
             MaxValueValidator(
                 6000, 'Cooking time exceeds all norms!')
         ],
-        help_text=(
-            'Enter the cooking time for the recipe in minutes.'
-        ),
+        help_text=Help_text_recipes.RECIPE_COOKING_TIME,
     )
 
     class Meta:
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
-        ordering = ('-name',)
+        ordering = ('name',)
         constraints = (
             models.UniqueConstraint(
                 fields=('name', 'author'),
                 name='unique_author_of_the_recipe',
             ),
         )
+
+    def formatted_text(self):
+        return format_html('<br>'.join(self.text.splitlines()))
 
     def __str__(self):
         return f'{self.name}:{self.author.username}'
@@ -174,23 +181,30 @@ class IngredientInRecipe(models.Model):
         return f'{self.ingredient}:{self.amount} in {self.recipe}'
 
 
-class Favorite(models.Model):
-    """Favorites model."""
+class UserRecipe(models.Model):
+    """Abstract class for shopping list and favorites."""
 
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favorites',
         verbose_name='User',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='user_favorites_list',
-        verbose_name="Recipe from the user's favorite list.",
+        verbose_name='Recipe',
     )
 
     class Meta:
+        abstract = True
+        ordering = ('recipe')
+
+
+class Favorite(UserRecipe):
+    """Favorites model."""
+
+    class Meta(UserRecipe.Meta):
+        default_related_name = 'favorites'
         verbose_name = 'Favorites'
         verbose_name_plural = 'Favorites'
         constraints = (
@@ -204,31 +218,19 @@ class Favorite(models.Model):
         return f'{self.recipe} from {self.user} favorites list'
 
 
-class ShoppingCart(models.Model):
+class ShoppingCart(UserRecipe):
     """ShoppingCart model."""
 
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='shopping_cart',
-        verbose_name='User',
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='user_shopping_cart',
-        verbose_name="Recipe from the user's shopping cart.",
-    )
-
-    class Meta:
+    class Meta(UserRecipe.Meta):
+        default_related_name = 'shopping_cart'
+        verbose_name = 'Shopping cart'
+        verbose_name_plural = 'Shopping carts.'
         constraints = (
             models.UniqueConstraint(
                 fields=('user', 'recipe'),
                 name='unique_shopping_cart'
             ),
         )
-        verbose_name = 'Shopping cart'
-        verbose_name_plural = 'Shopping carts.'
 
     def __str__(self):
         return f'{self.recipe} from {self.user} shopping cart'

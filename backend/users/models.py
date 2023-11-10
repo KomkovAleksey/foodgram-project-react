@@ -5,6 +5,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from core.constants import Help_text_users
+
 
 class CustomUser(AbstractUser):
     """CustomUser model class."""
@@ -13,30 +15,30 @@ class CustomUser(AbstractUser):
         verbose_name='Email',
         max_length=254,
         unique=True,
-        help_text="Enter the user's unique email address.",
+        help_text=Help_text_users.HELP_EMAIL,
     )
     username = models.CharField(
         verbose_name='Username',
         max_length=150,
         unique=True,
-        help_text='Enter a unique username.',
+        help_text=Help_text_users.HELP_USERNAME,
     )
     first_name = models.CharField(
         verbose_name='Name',
         max_length=150,
-        help_text='Enter your name.',
+        help_text=Help_text_users.HELP_FIRST_NAME,
     )
     last_name = models.CharField(
         verbose_name='Surname',
         max_length=150,
-        help_text='Enter your last name.',
+        help_text=Help_text_users.HELP_LAST_NAME,
     )
     password = models.CharField(
         verbose_name='Password',
         max_length=50,
         blank=False,
         null=False,
-        help_text='Enter your unique user password.',
+        help_text=Help_text_users.HELP_PASSWORD,
     )
 
     USERNAME_FIELD = 'email'

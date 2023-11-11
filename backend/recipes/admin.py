@@ -2,6 +2,7 @@
 Module for registering "recipe" app models in the admin interface.
 """
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 
 from .models import (
     Tag,
@@ -28,6 +29,7 @@ class IngredientsInRecipeInline(admin.StackedInline):
     """
 
     model = IngredientInRecipe
+    min_num = 1
     extra = 1
 
 
@@ -117,12 +119,29 @@ class RecipeAdmin(admin.ModelAdmin):
         'ingredients',
     )
 
+    @admin.display()
     def get_favorites(self, instance):
         """
         Shows the total number of times
         this recipe has been added to favorites.
         """
         return instance.favorite_recipes.count()
+
+    @admin.display(description='ingredients')
+    def get_ingredients(self, obj):
+        """."""
+        queryset = IngredientInRecipe.objects.filter(recipe_id=obj.id).all
+
+        return ', '.join([
+            f'{item.ingredient.name} {item.ingredient.amount} '
+            f'{item.ingredient.measurement_unit}'
+            for item in queryset
+        ])
+
+    @admin.display(description='image')
+    def get_image(self, obj):
+        """."""
+        return mark_safe(f'<img src={obj.image.url} width="80" height="60">')
 
 
 @admin.register(Favorite)

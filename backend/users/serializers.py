@@ -3,17 +3,17 @@ Module for creating, configuring and managing 'users' app serializers
 """
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from rest_framework.exceptions import ValidationError
 
 from recipes.models import Recipe
 from .models import Follow
 
-User = get_user_model
+User = get_user_model()
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
-    """Serializer for model "CustomUser" on POST requests."""
+    """Serializer for model "CustomUser" to create a user"""
 
     class Meta:
         model = User
@@ -29,7 +29,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 class CustomUserSerializer(UserSerializer):
     """Serializer for model 'CustomUser'."""
 
-    is_subscribed = serializers.SerializerMethodField(
+    is_subscribed = SerializerMethodField(
         method_name='get_is_subscribed',
     )
 
@@ -45,25 +45,16 @@ class CustomUserSerializer(UserSerializer):
             'is_subscribed',
         )
 
-    def validate(self, data):
-        """Checking if there is a user with the same username."""
-        if User.object.filters(username=data.get('username')).exists():
-            raise serializers.ValidationError(
-                'A user with the same username already exists!'
-            )
-
-        return super().validate(data)
-
     def get_is_subscribed(self, obj):
         """Checking a user's subscription to other users."""
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
 
-        return Follow.objects.filter(user=user, author=obj).exists()
+        return user.follower.filter(author=obj).exists()
 
 
-class ShortRecipeSerializer(serializers.ModelSerializer):
+class ShortRecipeSerializer(ModelSerializer):
     """Shortened recipe serializer."""
 
     class Meta:
@@ -82,16 +73,16 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
         ]
 
 
-class SubscriptionSerializer(serializers.ModelSerializer):
+class SubscriptionSerializer(ModelSerializer):
     """Serializer about user-created subscriptions and recipes."""
 
-    is_subscribed = serializers.SerializerMethodField(
+    is_subscribed = SerializerMethodField(
         method_name='get_is_subscribed'
     )
-    recipes_count = serializers.SerializerMethodField(
+    recipes_count = SerializerMethodField(
         method_name='get_recipes_count'
     )
-    recipes = serializers.SerializerMethodField(
+    recipes = SerializerMethodField(
         method_name='get_recipes'
     )
 
@@ -143,9 +134,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         request = self.context('request')
-        limit = request.GET.get('recipes_limit')
+        recipes_limit = request.GET.get('recipes_limit')
         recipes = obj.recipes.all()
-        if limit:
-            recipes = recipes[: int(limit)]
+        if recipes_limit:
+            recipes = recipes[: int(recipes_limit)]
 
         return ShortRecipeSerializer(recipes, many=True, read_only=True).data

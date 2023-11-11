@@ -197,7 +197,7 @@ class UserRecipe(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ('recipe')
+        ordering = ('recipe',)
 
 
 class Favorite(UserRecipe):

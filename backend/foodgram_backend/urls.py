@@ -10,7 +10,7 @@ from django.urls import include, path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('users.urls'), name='users'),
-    # path('api/', include('api.urls'), name='api'),
+    path('api/', include('api.v1.urls'), name='api'),
 ]
 
 if settings.DEBUG:

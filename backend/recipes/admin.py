@@ -14,7 +14,7 @@ from .models import (
 )
 
 admin.site.site_header = (
-    'Administration of the "recipes" app for "foodgram" project.'
+    'Foodgram project administration zone.'
 )
 
 admin.site.empty_value_display = '-empty-'

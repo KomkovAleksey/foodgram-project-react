@@ -11,6 +11,22 @@ from core.constants import HelpTextUsers, ConstantUsers
 class CustomUser(AbstractUser):
     """CustomUser model class."""
 
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
+    CUSTOM_USER_ROLE_CHOICES = [
+        (USER, 'user'),
+        (MODERATOR, 'moderator'),
+        (ADMIN, 'admin'),
+    ]
+
+    role = models.CharField(
+        verbose_name='User Role',
+        choices=CUSTOM_USER_ROLE_CHOICES,
+        default=USER,
+        max_length=16,
+    )
+
     email = models.EmailField(
         verbose_name='Email',
         max_length=ConstantUsers.MAX_EMAIL_LENGTH,
@@ -58,6 +74,14 @@ class CustomUser(AbstractUser):
                 name='unique_username_email'
             )
         ]
+
+    @property
+    def is_admin_or_super_user(self):
+        return self.role == self.ADMIN or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == self.MODERATOR
 
     def __str__(self):
         return f'{self.get_full_name()}: {self.email}'

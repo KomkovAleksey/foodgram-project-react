@@ -7,7 +7,7 @@ from django.db import models
 from django.utils.html import format_html
 from colorfield.fields import ColorField
 
-from core.constants import Help_text_recipes, Const_recipes
+from core.constants import HelpTextRecipes, ConstantRecipes
 
 
 User = get_user_model()
@@ -17,15 +17,15 @@ class Ingredient(models.Model):
     """Ingredient model."""
 
     name = models.CharField(
-        max_length=Const_recipes.MAX_NAME_LENGTH,
+        max_length=ConstantRecipes.MAX_NAME_LENGTH,
         verbose_name='Ingredient name',
         db_index=True,
-        help_text=Help_text_recipes.INGREDIENT_NAME,
+        help_text=HelpTextRecipes.INGREDIENT_NAME,
     )
     measurement_unit = models.CharField(
-        max_length=Const_recipes.MAX_MEASUREMENT_UNIT,
+        max_length=ConstantRecipes.MAX_MEASUREMENT_UNIT,
         verbose_name='Measurement unit',
-        help_text=Help_text_recipes.MEASUREMENT_UNIT,
+        help_text=HelpTextRecipes.MEASUREMENT_UNIT,
     )
 
     class Meta:
@@ -47,22 +47,22 @@ class Tag(models.Model):
     """Tag model."""
 
     name = models.CharField(
-        max_length=Const_recipes.MAX_NAME_LENGTH,
+        max_length=ConstantRecipes.MAX_NAME_LENGTH,
         unique=True,
         verbose_name='Tag name',
-        help_text=Help_text_recipes.TAG_NAME,
+        help_text=HelpTextRecipes.TAG_NAME,
     )
     color = ColorField(
         default='#FF0000',
         verbose_name='Hex color',
         unique=True,
-        help_text=Help_text_recipes.TAG_COLOR,
+        help_text=HelpTextRecipes.TAG_COLOR,
     )
     slug = models.SlugField(
-        max_length=Const_recipes.MAX_SLUG_LENGTH,
+        max_length=ConstantRecipes.MAX_SLUG_LENGTH,
         unique=True,
         verbose_name='Tag slug',
-        help_text=Help_text_recipes.TAG_SLUG,
+        help_text=HelpTextRecipes.TAG_SLUG,
     )
 
     class Meta:
@@ -78,16 +78,16 @@ class Recipe(models.Model):
     """Recipe model."""
 
     name = models.CharField(
-        max_length=Const_recipes.MAX_NAME_LENGTH,
+        max_length=ConstantRecipes.MAX_NAME_LENGTH,
         verbose_name='Recipe name',
-        help_text=Help_text_recipes.RECIPE_NAME,
+        help_text=HelpTextRecipes.RECIPE_NAME,
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='recipes',
         verbose_name='Recipe author',
-        help_text=Help_text_recipes.RECIPE_AUTHOR,
+        help_text=HelpTextRecipes.RECIPE_AUTHOR,
     )
     image = models.ImageField(
         upload_to='recipes/images/',
@@ -96,14 +96,14 @@ class Recipe(models.Model):
     )
     text = models.TextField(
         verbose_name='Recipe description',
-        help_text=Help_text_recipes.RECIPE_TEXT,
+        help_text=HelpTextRecipes.RECIPE_TEXT,
     )
     tags = models.ManyToManyField(
         Tag,
         db_index=True,
         related_name='recipes',
         verbose_name='Recipe tags',
-        help_text=Help_text_recipes.RECIPE_TAG,
+        help_text=HelpTextRecipes.RECIPE_TAG,
     )
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -111,7 +111,7 @@ class Recipe(models.Model):
         through='IngredientInRecipe',
         through_fields=('recipe', 'ingredient'),
         verbose_name='Ingredients in the recipe.',
-        help_text=Help_text_recipes.RECIPE_INGREDIENT,
+        help_text=HelpTextRecipes.RECIPE_INGREDIENT,
     )
     cooking_time = models.IntegerField(
         blank=False,
@@ -119,15 +119,15 @@ class Recipe(models.Model):
         default=1,
         validators=[
             MinValueValidator(
-                Const_recipes.MIN_COOKING_TIME,
+                ConstantRecipes.MIN_COOKING_TIME,
                 'Cooking time must be >=1 minute.'
             ),
             MaxValueValidator(
-                Const_recipes.MAX_COOKING_TIME,
+                ConstantRecipes.MAX_COOKING_TIME,
                 'Cooking time exceeds all norms!'
             )
         ],
-        help_text=Help_text_recipes.RECIPE_COOKING_TIME,
+        help_text=HelpTextRecipes.RECIPE_COOKING_TIME,
     )
 
     class Meta:
@@ -167,16 +167,16 @@ class IngredientInRecipe(models.Model):
         verbose_name='Amount of ingredients',
         validators=[
             MinValueValidator(
-                Const_recipes.MIN_AMOUNT,
+                ConstantRecipes.MIN_AMOUNT,
                 'The number of ingredients must be >=1.'
             ),
             MaxValueValidator(
-                Const_recipes.MAX_AMOUNT,
+                ConstantRecipes.MAX_AMOUNT,
                 'You have exceeded the permitted quantity of ingredients!'
             )
         ],
         default=1,
-        help_text=Help_text_recipes.AMOUNT,
+        help_text=HelpTextRecipes.AMOUNT,
     )
 
     class Meta:

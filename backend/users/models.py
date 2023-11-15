@@ -2,10 +2,12 @@
 Module for creating, configuring and managing `users' app models.
 """
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.db import models
 
 from core.constants import HelpTextUsers, ConstantUsers
+from core.validators import validate_username
 
 
 class CustomUser(AbstractUser):
@@ -38,6 +40,10 @@ class CustomUser(AbstractUser):
         max_length=ConstantUsers.MAX_USER_LENGTH,
         unique=True,
         help_text=HelpTextUsers.HELP_USERNAME,
+        validators=(
+            validate_username,
+            UnicodeUsernameValidator(),
+        )
     )
     first_name = models.CharField(
         verbose_name='Name',

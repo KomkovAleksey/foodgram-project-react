@@ -4,7 +4,7 @@ Constants.
 from django.utils.translation import gettext_lazy as _
 
 
-class Help_text_recipes():
+class HelpTextRecipes():
     """Help text for recipes app models in admin zone."""
 
     # Ingredient model.
@@ -27,7 +27,7 @@ class Help_text_recipes():
     AMOUNT = _('Please indicate the quantity of ingredients.')
 
 
-class Help_text_users():
+class HelpTextUsers():
     """Help text for users app models in admin zone."""
 
     # CustomUser model.
@@ -38,7 +38,7 @@ class Help_text_users():
     HELP_LAST_NAME = _('Enter your last name.')
 
 
-class Const_users():
+class ConstantUsers():
     """Constants for users app models."""
 
     # CustomUser model.
@@ -47,7 +47,7 @@ class Const_users():
     MAX_PASSWORD_LENGTH = 50
 
 
-class Const_recipes():
+class ConstantRecipes():
     """Constants for recipes app models."""
 
     MAX_NAME_LENGTH = 256
@@ -61,3 +61,9 @@ class Const_recipes():
     # IngredientInRecipe model.
     MIN_AMOUNT = 1
     MAX_AMOUNT = 9000
+
+
+class ErrorText():
+    """Error text."""
+
+    

@@ -44,7 +44,7 @@ class ConstantUsers():
     # CustomUser model.
     MAX_EMAIL_LENGTH = 254
     MAX_USER_LENGTH = 150
-    MAX_PASSWORD_LENGTH = 50
+    MAX_PASSWORD_LENGTH = 100
 
 
 class ConstantRecipes():

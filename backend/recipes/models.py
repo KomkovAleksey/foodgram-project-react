@@ -7,7 +7,7 @@ from django.db import models
 from django.utils.html import format_html
 from colorfield.fields import ColorField
 
-from core.constants import HelpTextRecipes, ConstantRecipes
+from core.constants import HelpTextRecipes, ConstantRecipes, ErrorText
 
 
 User = get_user_model()
@@ -120,11 +120,11 @@ class Recipe(models.Model):
         validators=[
             MinValueValidator(
                 ConstantRecipes.MIN_COOKING_TIME,
-                'Cooking time must be >=1 minute.'
+                ErrorText.MIN_COOKING_ERROR
             ),
             MaxValueValidator(
                 ConstantRecipes.MAX_COOKING_TIME,
-                'Cooking time exceeds all norms!'
+                ErrorText.MAX_COOKING_ERROR
             )
         ],
         help_text=HelpTextRecipes.RECIPE_COOKING_TIME,
@@ -168,11 +168,11 @@ class IngredientInRecipe(models.Model):
         validators=[
             MinValueValidator(
                 ConstantRecipes.MIN_AMOUNT,
-                'The number of ingredients must be >=1.'
+                ErrorText.MIN_AMOUNT_ERROR
             ),
             MaxValueValidator(
                 ConstantRecipes.MAX_AMOUNT,
-                'You have exceeded the permitted quantity of ingredients!'
+                ErrorText.MAX_AMOUNT_ERROR
             )
         ],
         default=1,

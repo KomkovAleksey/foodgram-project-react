@@ -66,4 +66,9 @@ class ConstantRecipes():
 class ErrorText():
     """Error text."""
 
-    
+    MIN_AMOUNT_ERROR = {'ingredient': 'The number of ingredients must be >=1.'}
+    MAX_AMOUNT_ERROR = {
+        'ingredient': 'The quantity of ingredients has reached the limit!'
+    }
+    MIN_COOKING_ERROR = {'Cooking time': 'Cooking time must be >=1 minute.'}
+    MAX_COOKING_ERROR = {'Cooking time': 'Cooking time exceeds all norms!'}

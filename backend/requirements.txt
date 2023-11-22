@@ -11,4 +11,3 @@ Pillow==10.0.0
 python-dotenv==1.0.0
 webcolors==1.13
 django_debug_toolbar==4.2.0
-reportlab==3.6.3

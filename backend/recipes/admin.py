@@ -69,7 +69,6 @@ class TagAdmin(admin.ModelAdmin):
     )
     search_fields = (
         'name',
-        'slug',
     )
     ordering = (
         'name',
@@ -125,11 +124,10 @@ class RecipeAdmin(admin.ModelAdmin):
         Shows the total number of times
         this recipe has been added to favorites.
         """
-        return instance.favorite_recipes.count()
+        return instance.favorites.count()
 
     @admin.display(description='ingredients')
     def get_ingredients(self, obj):
-        """."""
         queryset = IngredientInRecipe.objects.filter(recipe_id=obj.id).all
 
         return ', '.join([
@@ -140,7 +138,6 @@ class RecipeAdmin(admin.ModelAdmin):
 
     @admin.display(description='image')
     def get_image(self, obj):
-        """."""
         return mark_safe(f'<img src={obj.image.url} width="80" height="60">')
 
 

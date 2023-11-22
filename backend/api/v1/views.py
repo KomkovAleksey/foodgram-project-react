@@ -11,7 +11,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 
-from core.constants import ErrorText
 from users.serializers import ShortRecipeSerializer
 from recipes.models import (
     Ingredient,
@@ -84,14 +83,14 @@ class RecipeViewSet(ModelViewSet):
         user = self.request.user
         if not Recipe.objects.filter(id=pk).exists():
             return Response(
-                ErrorText.ADD_NON_EXIST_RECIPE_ERROR,
+                {'add recipe': 'You are trying to add a non-existent recipe!'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         recipe = Recipe.objects.get(id=pk)
         recipe_in_list = model.objects.filter(recipe=recipe, user=user)
         if recipe_in_list.exists():
             return Response(
-                ErrorText.ADD_RECIPE_TO_THE_LIST_ERROR,
+                {'add recipe': 'The recipe has already been added to list.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         model.objects.create(recipe=recipe, user=user)
@@ -111,8 +110,9 @@ class RecipeViewSet(ModelViewSet):
             recipe_in_list.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        return Response(
-            ErrorText.DELETE_NON_EXIST_RECIPE_ERROR,
+        return Response({
+            'recipe': 'You are trying to delete a recipe that does not exist.'
+        },
             status=status.HTTP_400_BAD_REQUEST,
         )
 

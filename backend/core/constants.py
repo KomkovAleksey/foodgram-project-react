@@ -61,23 +61,3 @@ class ConstantRecipes():
     # IngredientInRecipe model.
     MIN_AMOUNT = 1
     MAX_AMOUNT = 9000
-
-
-class ErrorText():
-    """Error text."""
-
-    MIN_AMOUNT_ERROR = {'ingredient': 'The number of ingredients must be >=1.'}
-    MAX_AMOUNT_ERROR = {
-        'ingredient': 'The quantity of ingredients has reached the limit!'
-    }
-    MIN_COOKING_ERROR = {'Cooking time': 'Cooking time must be >=1 minute.'}
-    MAX_COOKING_ERROR = {'Cooking time': 'Cooking time exceeds all norms!'}
-    DELETE_NON_EXIST_RECIPE_ERROR = {
-        'recipe': 'You are trying to delete a recipe that does not exist.'
-    }
-    ADD_NON_EXIST_RECIPE_ERROR = {
-        'add_recipe': 'You are trying to add a non-existent recipe!'
-    }
-    ADD_RECIPE_TO_THE_LIST_ERROR = {
-        'add_recipe': 'The recipe has already been added to list.'
-    }

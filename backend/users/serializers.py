@@ -3,9 +3,7 @@ Module for creating, configuring and managing 'users' app serializers
 """
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.contrib.auth import get_user_model
-from rest_framework import status
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
-from rest_framework.exceptions import ValidationError
 from drf_extra_fields.fields import Base64ImageField
 
 from recipes.models import Recipe
@@ -101,23 +99,6 @@ class SubscriptionSerializer(CustomUserSerializer):
             'first_name',
             'last_name',
         )
-
-    def validate_subscription(self, data):
-        """Subscription Validation."""
-        author = data['author']
-        user = data['user']
-        if user.follower.filter(author=author).exists():
-            raise ValidationError(
-                'You are already subscribed.',
-                code=status.HTTP_400_BAD_REQUEST,
-            )
-        if user == author:
-            raise ValidationError(
-                "You can't subscribe to yourself.",
-                code=status.HTTP_400_BAD_REQUEST,
-            )
-
-        return super().validate(data)
 
     def get_recipes_count(self, obj):
         """Getting the total number of recipes for current author."""

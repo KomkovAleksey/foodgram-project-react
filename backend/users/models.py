@@ -30,7 +30,7 @@ class CustomUser(AbstractUser):
     )
 
     email = models.EmailField(
-        verbose_name='Email',
+        verbose_name='Email address',
         max_length=ConstantUsers.MAX_EMAIL_LENGTH,
         unique=True,
         help_text=HelpTextUsers.HELP_EMAIL,
@@ -128,6 +128,7 @@ class Follow(models.Model):
             raise ValidationError(
                 'You cannot subscribe to the same author twice.'
             )
+
         return super().save(self)
 
     def __str__(self):

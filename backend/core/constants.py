@@ -50,7 +50,7 @@ class ConstantUsers():
 class ConstantRecipes():
     """Constants for recipes app models."""
 
-    MAX_NAME_LENGTH = 256
+    MAX_NAME_LENGTH = 200
     # Ingredient model.
     MAX_MEASUREMENT_UNIT = 256
     # Tag model.
@@ -72,3 +72,12 @@ class ErrorText():
     }
     MIN_COOKING_ERROR = {'Cooking time': 'Cooking time must be >=1 minute.'}
     MAX_COOKING_ERROR = {'Cooking time': 'Cooking time exceeds all norms!'}
+    DELETE_NON_EXIST_RECIPE_ERROR = {
+        'recipe': 'You are trying to delete a recipe that does not exist.'
+    }
+    ADD_NON_EXIST_RECIPE_ERROR = {
+        'add_recipe': 'You are trying to add a non-existent recipe!'
+    }
+    ADD_RECIPE_TO_THE_LIST_ERROR = {
+        'add_recipe': 'The recipe has already been added to list.'
+    }

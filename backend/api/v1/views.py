@@ -11,6 +11,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 
+from core.constants import ErrorText
 from users.serializers import ShortRecipeSerializer
 from recipes.models import (
     Ingredient,
@@ -83,20 +84,22 @@ class RecipeViewSet(ModelViewSet):
         user = self.request.user
         if not Recipe.objects.filter(id=pk).exists():
             return Response(
-                'There is no such recipe.',
+                ErrorText.ADD_NON_EXIST_RECIPE_ERROR,
                 status=status.HTTP_400_BAD_REQUEST
             )
         recipe = Recipe.objects.get(id=pk)
         recipe_in_list = model.objects.filter(recipe=recipe, user=user)
         if recipe_in_list.exists():
             return Response(
-                {'error': 'The recipe has already been added to list.'},
+                ErrorText.ADD_RECIPE_TO_THE_LIST_ERROR,
                 status=status.HTTP_400_BAD_REQUEST,
             )
         model.objects.create(recipe=recipe, user=user)
         serializer = ShortRecipeSerializer(recipe)
+
         return Response(
-            data=serializer.data, status=status.HTTP_201_CREATED
+            data=serializer.data,
+            status=status.HTTP_201_CREATED
         )
 
     def delete_recipe(self, model, request, pk):
@@ -107,8 +110,9 @@ class RecipeViewSet(ModelViewSet):
         if recipe_in_list.exists():
             recipe_in_list.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
         return Response(
-            {'error': 'You are trying to delete a recipe that does not exist.'},
+            ErrorText.DELETE_NON_EXIST_RECIPE_ERROR,
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -125,6 +129,7 @@ class RecipeViewSet(ModelViewSet):
         if request.method == 'POST':
             return self.add_recipe(Favorite, request, pk)
         if request.method == 'DELETE':
+
             return self.delete_recipe(Favorite, request, pk)
 
     @action(
@@ -140,6 +145,7 @@ class RecipeViewSet(ModelViewSet):
         if request.method == 'POST':
             return self.add_recipe(ShoppingCart, request, pk)
         if request.method == 'DELETE':
+
             return self.delete_recipe(ShoppingCart, request, pk)
 
     @action(

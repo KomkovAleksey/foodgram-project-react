@@ -7,7 +7,7 @@ from django.db import models
 from django.utils.html import format_html
 from colorfield.fields import ColorField
 
-from core.constants import HelpTextRecipes, ConstantRecipes, ErrorText
+from core.constants import HelpTextRecipes, ConstantRecipes
 
 
 User = get_user_model()
@@ -35,12 +35,12 @@ class Ingredient(models.Model):
         constraints = (
             models.UniqueConstraint(
                 fields=('name', 'measurement_unit'),
-                name='unique_ingredient_name_and_measurement_unit',
+                name='unique_ingredient_measurement_unit',
             ),
         )
 
     def __str__(self):
-        return self.name
+        return f'{self.name}: {self.measurement_unit}'
 
 
 class Tag(models.Model):
@@ -107,9 +107,8 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        related_name='ingredients',
+        related_name='recipes',
         through='IngredientInRecipe',
-        through_fields=('recipe', 'ingredient'),
         verbose_name='Ingredients in the recipe.',
         help_text=HelpTextRecipes.RECIPE_INGREDIENT,
     )
@@ -120,11 +119,11 @@ class Recipe(models.Model):
         validators=[
             MinValueValidator(
                 ConstantRecipes.MIN_COOKING_TIME,
-                ErrorText.MIN_COOKING_ERROR
+                {'Cooking time': 'Cooking time must be >=1 minute.'}
             ),
             MaxValueValidator(
                 ConstantRecipes.MAX_COOKING_TIME,
-                ErrorText.MAX_COOKING_ERROR
+                {'Cooking time': 'Cooking time exceeds all norms!'}
             )
         ],
         help_text=HelpTextRecipes.RECIPE_COOKING_TIME,
@@ -134,12 +133,6 @@ class Recipe(models.Model):
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
         ordering = ('name',)
-        constraints = (
-            models.UniqueConstraint(
-                fields=('name', 'author'),
-                name='unique_author_of_the_recipe',
-            ),
-        )
 
     def formatted_text(self):
         return format_html('<br>'.join(self.text.splitlines()))
@@ -168,11 +161,11 @@ class IngredientInRecipe(models.Model):
         validators=[
             MinValueValidator(
                 ConstantRecipes.MIN_AMOUNT,
-                ErrorText.MIN_AMOUNT_ERROR
+                {'ingredient': 'The number of ingredients must be >=1.'}
             ),
             MaxValueValidator(
                 ConstantRecipes.MAX_AMOUNT,
-                ErrorText.MAX_AMOUNT_ERROR
+                {'ingredient': 'Too many ingredients'}
             )
         ],
         default=1,
@@ -182,12 +175,6 @@ class IngredientInRecipe(models.Model):
     class Meta:
         verbose_name = 'Ingredient in recipe'
         verbose_name_plural = 'Ingredients in recipes'
-        constraints = (
-            models.UniqueConstraint(
-                fields=('ingredient', 'recipe'),
-                name='unique_ingredient_in_recipe',
-            ),
-        )
 
     def __str__(self):
         return f'{self.ingredient}:{self.amount} in {self.recipe}'

@@ -2,8 +2,8 @@
 Module for creating, configuring and managing `users' app models.
 """
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.db import models
 
 from core.constants import HelpTextUsers, ConstantUsers
@@ -42,7 +42,10 @@ class CustomUser(AbstractUser):
         help_text=HelpTextUsers.HELP_USERNAME,
         validators=(
             validate_username,
-            UnicodeUsernameValidator(),
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message='The username contains invalid characters.',
+            ),
         )
     )
     first_name = models.CharField(

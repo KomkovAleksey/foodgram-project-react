@@ -6,7 +6,7 @@ User = get_user_model()
 
 
 class UserRecipe(models.Model):
-    """Abstract class for shopping list and favorites."""
+    """Abstract model for shopping list and favorites."""
 
     user = models.ForeignKey(
         User,

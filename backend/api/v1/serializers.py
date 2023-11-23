@@ -2,13 +2,14 @@
 Module for creating, configuring and managing 'recipes' app serializers
 """
 import webcolors
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from django.contrib.auth import get_user_model
 from rest_framework import serializers, validators
 from django.db.transaction import atomic
 from drf_extra_fields.fields import Base64ImageField
 
 from core.constants import ConstantRecipes
-from core.service import create_IngredientInRecipe_objects, in_list
-from users.serializers import CustomUserSerializer
+from users.models import Follow
 from recipes.models import (
     Ingredient,
     Tag,
@@ -17,6 +18,112 @@ from recipes.models import (
     Favorite,
     ShoppingCart
 )
+
+User = get_user_model()
+
+
+class CustomUserCreateSerializer(UserCreateSerializer):
+    """Serializer for model "CustomUser" to create a user"""
+
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'password',
+        )
+
+
+class CustomUserSerializer(UserSerializer):
+    """Serializer for model 'CustomUser'."""
+
+    is_subscribed = serializers.SerializerMethodField(
+        method_name='get_is_subscribed',
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'password',
+            'is_subscribed',
+        )
+        extra_kwargs = {"password": {"write_only": True}}
+
+    def get_is_subscribed(self, obj):
+        """Checking a user's subscription to other users."""
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+
+        return Follow.objects.filter(user=user, author=obj).exists()
+    
+
+class ShortRecipeSerializer(serializers.ModelSerializer):
+    """Shortened recipe serializer."""
+
+    image = Base64ImageField()
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        )
+
+
+class SubscriptionSerializer(CustomUserSerializer):
+    """Serializer about user-created subscriptions and recipes."""
+
+    recipes_count = serializers.SerializerMethodField(
+        method_name='get_recipes_count'
+    )
+    recipes = serializers.SerializerMethodField(
+        method_name='get_recipes'
+    )
+
+    class Meta(CustomUserSerializer.Meta):
+        model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count'
+        )
+        read_only_fields = (
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+        )
+
+    def get_recipes_count(self, obj):
+        """Getting the total number of recipes for current author."""
+        return obj.recipes.count()
+
+    def get_recipes(self, obj):
+        """Get the number of recipes for a specific author."""
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        if limit:
+            recipes = obj.recipes.all()[: int(limit)]
+        else:
+            recipes = obj.recipes.all()
+
+        return ShortRecipeSerializer(recipes, many=True, read_only=True).data
 
 
 class Hex2NameColor(serializers.Field):
@@ -150,13 +257,21 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
         return IngredientInRecipeSerializer(ingredients, many=True).data
 
+    def in_list(self, obj, model):
+        """Checking whether the recipe is on the list."""
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+
+        return model.objects.filter(user=request.user, recipe=obj).exists()
+
     def get_is_favorited(self, obj):
         """Checking whether the recipe is in your favorites."""
-        return in_list(obj, Favorite)
+        return self.in_list(obj, Favorite)
 
     def get_is_in_shopping_cart(self, obj):
         """Checking whether the recipe is in the shopping cart."""
-        return in_list(obj, ShoppingCart)
+        return self.in_list(obj, ShoppingCart)
 
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
@@ -244,6 +359,19 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
         return super().validate(data)
 
+    @staticmethod
+    def create_IngredientInRecipe_objects(ingredients, recipe):
+        """Creates ingredients for a recipe."""
+        ingredient_list = [
+            IngredientInRecipe(
+                recipe=recipe,
+                ingredient=ingredient['id'],
+                amount=ingredient['amount']
+            ) for ingredient in ingredients
+        ]
+        ingredient_list.sort(key=lambda item: item.ingredient.name)
+        IngredientInRecipe.objects.bulk_create(ingredient_list)
+
     @atomic
     def create(self, validated_data):
         """Creates a recipe."""
@@ -252,7 +380,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         recipe.save()
-        create_IngredientInRecipe_objects(ingredients, recipe)
+        self.create_IngredientInRecipe_objects(ingredients, recipe)
 
         return recipe
 
@@ -264,7 +392,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         instance.tags.clear()
         instance.tags.set(tags)
         IngredientInRecipe.objects.filter(recipe=instance).delete()
-        create_IngredientInRecipe_objects(ingredients, instance)
+        self.create_IngredientInRecipe_objects(ingredients, instance)
 
         return super().update(instance, validated_data)
 

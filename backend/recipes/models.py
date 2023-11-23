@@ -8,6 +8,7 @@ from django.utils.html import format_html
 from colorfield.fields import ColorField
 
 from core.constants import HelpTextRecipes, ConstantRecipes
+from core.models import UserRecipe
 
 
 User = get_user_model()
@@ -128,11 +129,18 @@ class Recipe(models.Model):
         ],
         help_text=HelpTextRecipes.RECIPE_COOKING_TIME,
     )
+    pub_date = models.DateTimeField(
+        verbose_name='Recipe publication date.',
+        auto_now_add=True,
+    )
 
     class Meta:
         verbose_name = 'Recipe'
         verbose_name_plural = 'Recipes'
-        ordering = ('name',)
+        ordering = (
+            'name',
+            'pub_date',
+        )
 
     def formatted_text(self):
         return format_html('<br>'.join(self.text.splitlines()))
@@ -178,25 +186,6 @@ class IngredientInRecipe(models.Model):
 
     def __str__(self):
         return f'{self.ingredient}:{self.amount} in {self.recipe}'
-
-
-class UserRecipe(models.Model):
-    """Abstract class for shopping list and favorites."""
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='User',
-    )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Recipe',
-    )
-
-    class Meta:
-        abstract = True
-        ordering = ('recipe',)
 
 
 class Favorite(UserRecipe):

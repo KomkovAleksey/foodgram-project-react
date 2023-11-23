@@ -7,7 +7,7 @@ from django.db.transaction import atomic
 from drf_extra_fields.fields import Base64ImageField
 
 from core.constants import ConstantRecipes
-from core.service import create_IngredientInRecipe_objects
+from core.service import create_IngredientInRecipe_objects, in_list
 from users.serializers import CustomUserSerializer
 from recipes.models import (
     Ingredient,
@@ -150,21 +150,13 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
         return IngredientInRecipeSerializer(ingredients, many=True).data
 
-    def in_list(self, obj, model):
-        """Checking whether the recipe is on the list."""
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-
-        return model.objects.filter(user=request.user, recipe=obj).exists()
-
     def get_is_favorited(self, obj):
         """Checking whether the recipe is in your favorites."""
-        return self.in_list(obj, Favorite)
+        return in_list(obj, Favorite)
 
     def get_is_in_shopping_cart(self, obj):
         """Checking whether the recipe is in the shopping cart."""
-        return self.in_list(obj, ShoppingCart)
+        return in_list(obj, ShoppingCart)
 
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):

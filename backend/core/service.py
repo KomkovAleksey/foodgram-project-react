@@ -13,3 +13,12 @@ def create_IngredientInRecipe_objects(ingredients, recipe):
     ]
     ingredient_list.sort(key=lambda item: item.ingredient.name)
     IngredientInRecipe.objects.bulk_create(ingredient_list)
+
+
+def in_list(self, obj, model):
+    """Checking whether the recipe is on the list."""
+    request = self.context.get('request')
+    if request is None or request.user.is_anonymous:
+        return False
+
+    return model.objects.filter(user=request.user, recipe=obj).exists()

@@ -17,11 +17,10 @@ services:
       dockerfile: Dockerfile
     restart: always
     env_file: ../.env
-    expose:
-      - 8000
     volumes:
       - static_value:/app/backend_static/
       - media_value:/app/backend_media/
+      - ../backend:/app/
     depends_on:
       - db
 
@@ -50,4 +49,3 @@ volumes:
   static_value:
   media_value:
   db-data:
-

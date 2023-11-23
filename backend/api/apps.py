@@ -5,7 +5,8 @@ from django.apps import AppConfig
 
 
 class ApiConfig(AppConfig):
-    """ api application configuration class. """
+    """api application configuration class."""
 
     default_auto_field = "django.db.models.BigAutoField"
     name = "api"
+    verbose_name = "Foodgram api."

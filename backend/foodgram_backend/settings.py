@@ -6,23 +6,21 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', default='secretkey')
+INSECURE_KEY = 'django-insecure-0eikswwglid=ukts4l2_b=676m!-q_%154%2z@&l3)n6)cp3#c'
+SECRET_KEY = os.getenv('SECRET_KEY', INSECURE_KEY)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'True'
-# DEBUG = os.getenv('DEBUG') == 'True'
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(' ')
 
-
-# Application definition
 
 INSTALLED_APPS = [
     # DJANGO_APPS
@@ -39,11 +37,13 @@ INSTALLED_APPS = [
     "django_filters",
     "colorfield",
     "djoser",
+    "debug_toolbar",
 
     # LOCAL_APPS
     "api.apps.ApiConfig",
     "users.apps.UsersConfig",
     "recipes.apps.RecipesConfig",
+    "core.apps.CoreConfig",
 ]
 
 MIDDLEWARE = [
@@ -54,6 +54,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 ROOT_URLCONF = "foodgram_backend.urls"
@@ -78,9 +79,6 @@ WSGI_APPLICATION = "foodgram_backend.wsgi.application"
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
 if not DEBUG:
     DATABASES = {
         "default": {
@@ -101,9 +99,6 @@ else:
     }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -120,56 +115,46 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
     ],
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend'
-    ],
-
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
 }
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]
 
 DJOSER = {
     "LOGIN_FIELD": 'email',
     "HIDE_USERS": False,
     "SERIALIZERS": {
-        'user': 'users.serializers.CustomUserSerializer',
-        "current_user": 'users.serializers.CustomUserSerializer',
-        'user_create': 'users.serializers.CustomUserCreateSerializer',
-        "user_list": 'users.serializers.CustomUserSerializer',
+        "user_create": "api.v1.serializers.CustomUserCreateSerializer",
+        "user": "api.v1.serializers.CustomUserSerializer",
+        "current_user": "api.v1.serializers.CustomUserSerializer",
     },
-    'PERMISSIONS': {
-        'user': ['rest_framework.permissions.AllowAny'],
-        'user_list': ['rest_framework.permissions.AllowAny'],
+    "PERMISSIONS": {
+        "user": ["djoser.permissions.CurrentUserOrAdminOrReadOnly"],
+        "user_list": ["rest_framework.permissions.IsAuthenticatedOrReadOnly"],
     },
 }
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Moscow"
 
 USE_I18N = True
 
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
 STATIC_URL = '/backend_static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'backend_static/')
 
 MEDIA_URL = '/backend_media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'backend_media/')
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

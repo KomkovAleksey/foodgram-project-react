@@ -7,6 +7,7 @@ from django.db.transaction import atomic
 from drf_extra_fields.fields import Base64ImageField
 
 from core.constants import ConstantRecipes
+from core.service import create_IngredientInRecipe_objects
 from users.serializers import CustomUserSerializer
 from recipes.models import (
     Ingredient,
@@ -96,7 +97,7 @@ class AddIngredientSerializer(serializers.ModelSerializer):
     )
     amount = serializers.IntegerField(
         min_value=ConstantRecipes.MIN_AMOUNT,
-        max_value=ConstantRecipes.MAX_AMOUNT
+        max_value=ConstantRecipes.MAX_AMOUNT,
     )
 
     class Meta:
@@ -118,7 +119,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     ingredients = serializers.SerializerMethodField(
         method_name='get_ingredients',
     )
-    image = Base64ImageField()
+    image = Base64ImageField(required=True)
     is_favorited = serializers.SerializerMethodField(
         read_only=True,
         method_name='get_is_favorited',
@@ -167,7 +168,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for model 'Recipe' on POST, PATCH, DELETE requests."""
+    """Serializer for model 'Recipe' on POST, PATCH, requests."""
 
     author = CustomUserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(
@@ -175,7 +176,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         many=True,
     )
     ingredients = AddIngredientSerializer(many=True)
-    image = Base64ImageField(max_length=None)
+    image = Base64ImageField(required=True)
     cooking_time = serializers.IntegerField(
         min_value=ConstantRecipes.MIN_COOKING_TIME,
         max_value=ConstantRecipes.MAX_COOKING_TIME
@@ -198,71 +199,58 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         # Checking tags.
         tags = data.get('tags')
         if not tags:
-            raise serializers.ValidationError({
-                'tags': 'You must select at least one tag.'
-            })
+            raise serializers.ValidationError(
+                {'tags': 'You must select at least one tag.'}
+            )
         if len(tags) != len(set(tags)):
-            raise serializers.ValidationError({
-                'tags': 'Tags should not be repeated!'
-            })
+            raise serializers.ValidationError(
+                {'tags': 'Tags should not be repeated!'}
+            )
 
         # Checking ingredients.
         ingredients = data.get('ingredients')
         if not ingredients:
-            raise serializers.ValidationError({
-                'ingredients': 'The ingredients field cannot be empty.'
-            })
+            raise serializers.ValidationError(
+                {'ingredients': 'The ingredients field cannot be empty.'}
+            )
         for ingredient in ingredients:
             ingredient_name = ingredient['id']
         if int(ingredient['amount']) <= 0:
-            raise serializers.ValidationError({
-                'ingredients': f'Incorrect quantity for {ingredient_name}'
-            })
+            raise serializers.ValidationError(
+                {'ingredients': f'Incorrect quantity for {ingredient_name}'}
+            )
         if not isinstance(ingredient['amount'], int):
-            raise serializers.ValidationError({
-                'ingredients': 'must be a whole number!'
-            })
+            raise serializers.ValidationError(
+                {'ingredients': 'must be a whole number!'}
+            )
         if (len(set(item["id"] for item in ingredients)) != len(ingredients)):
-            raise serializers.ValidationError({
-                'ingredients': 'There can be no duplicate ingredients!'
-            })
+            raise serializers.ValidationError(
+                {'ingredients': 'There can be no duplicate ingredients!'}
+            )
 
         # Checking the cooking time.
         cooking_time = data.get('cooking_time')
         if not cooking_time:
-            raise serializers.ValidationError({
-                'cooking_time': 'Add cooking time to recipe.'
-            })
+            raise serializers.ValidationError(
+                {'cooking_time': 'Add cooking time to recipe.'}
+            )
         if cooking_time < ConstantRecipes.MIN_COOKING_TIME:
-            raise serializers.ValidationError({
-                'Cooking time': 'Cooking time must be >=1 minute.'
-            })
+            raise serializers.ValidationError(
+                {'Cooking time': 'Cooking time must be >=1 minute.'}
+            )
         if cooking_time > ConstantRecipes.MAX_COOKING_TIME:
-            raise serializers.ValidationError({
-                'Cooking time': 'Cooking time exceeds all norms!'
-            })
+            raise serializers.ValidationError(
+                {'Cooking time': 'Cooking time exceeds all norms!'}
+            )
 
         # Checking recipe image.
         image = data.get('image')
         if not image:
-            raise serializers.ValidationError({
-                'image': 'Add recipe images.'
-            })
+            raise serializers.ValidationError(
+                {'image': 'Add recipe images.'}
+            )
 
         return super().validate(data)
-
-    @staticmethod
-    def create_IngredientInRecipe_objects(ingredients, recipe):
-        """Creates ingredients for a recipe."""
-        ingredient_list = [
-            IngredientInRecipe(
-                recipe=recipe,
-                ingredient=ingredient['id'],
-                amount=ingredient['amount']
-            ) for ingredient in ingredients
-        ]
-        ingredient_list.sort(key=lambda item: item.ingredient.name)
-        IngredientInRecipe.objects.bulk_create(ingredient_list)
 
     @atomic
     def create(self, validated_data):
@@ -272,7 +260,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         recipe.save()
-        self.create_IngredientInRecipe_objects(ingredients, recipe)
+        create_IngredientInRecipe_objects(ingredients, recipe)
 
         return recipe
 
@@ -284,7 +272,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         instance.tags.clear()
         instance.tags.set(tags)
         IngredientInRecipe.objects.filter(recipe=instance).delete()
-        self.create_IngredientInRecipe_objects(ingredients, instance)
+        create_IngredientInRecipe_objects(ingredients, instance)
 
         return super().update(instance, validated_data)
 

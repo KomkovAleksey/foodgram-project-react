@@ -90,7 +90,7 @@ class Recipe(models.Model):
         help_text=HelpTextRecipes.RECIPE_AUTHOR,
     )
     image = models.ImageField(
-        upload_to='recipes/images/',
+        upload_to='recipes/',
         verbose_name='Recipe image',
         blank=True,
     )

@@ -64,7 +64,7 @@ class CustomUserSerializer(UserSerializer):
             return False
 
         return Follow.objects.filter(user=user, author=obj).exists()
-    
+
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
     """Shortened recipe serializer."""

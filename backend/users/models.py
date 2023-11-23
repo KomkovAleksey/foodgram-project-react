@@ -93,7 +93,7 @@ class CustomUser(AbstractUser):
         return self.role == self.MODERATOR
 
     def __str__(self):
-        return f'{self.get_full_name()}: {self.email}'
+        return f'{self.get_full_name()}'
 
 
 class Follow(models.Model):

@@ -1,7 +1,10 @@
 """
 Module for creating, configuring and managing `api' app viewsets
 """
+from datetime import datetime
+
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum
@@ -22,7 +25,6 @@ from recipes.models import (
     IngredientInRecipe
 )
 from users.models import Follow
-from core.utils import convert_txt
 from .pagination import CustomPagination
 from .permissions import IsAuthorOrReadOnly, IsAdminUserOrReadOnly
 from .filters import IngredientFilter, RecipeFilter
@@ -236,13 +238,32 @@ class RecipeViewSet(ModelViewSet):
     )
     def download_shopping_cart(self, request):
         """Downloads a shopping list."""
+        user = request.user
+        if not user.shopping_cart.exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         ingredients = IngredientInRecipe.objects.filter(
-            recipe__shopping_cart__user=request.user
+            recipe__shopping_cart__user=user
         ).values(
             'ingredient__name',
             'ingredient__measurement_unit'
         ).order_by(
             'ingredient__name'
-        ).annotate(ingredient_total=Sum('amount'))
+        ).annotate(amount=Sum('amount'))
+        today = datetime.today()
+        shopping_list = (
+            f"FoodGram Service\n"
+            f"{user}\n"
+            f"Today's date.: {today:%Y-%m-%d}\n"
+            f"Your shopping list.:\n"
+        )
+        shopping_list += '\n'.join([
+            f'- {ingredient["ingredient__name"]} - {ingredient["amount"]} '
+            f'{ingredient["ingredient__measurement_unit"]}'
+            for ingredient in ingredients
+        ])
+        filename = f'{user}_shopping_list.txt'
+        content_type = 'text/plain,charset=utf8'
+        response = HttpResponse(shopping_list, content_type=content_type)
+        response['Content-Disposition'] = f'attachment; filename={filename}'
 
-        return convert_txt(ingredients)
+        return response

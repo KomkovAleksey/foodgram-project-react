@@ -252,7 +252,6 @@ class RecipeViewSet(ModelViewSet):
         today = datetime.today()
         shopping_list = (
             f"FoodGram Service\n"
-            f"{user}\n"
             f"Today's date.: {today:%Y-%m-%d}\n"
             f"Your shopping list.:\n"
         )

@@ -13,9 +13,16 @@
 - Python 3.11.2
 - Docker
 - Nginx
-- Django 4.2.3
-- djangorestframework 3.14.0
+- Django 3.2.16
+- djangorestframework 3.12.4
 - postgres:13.0-alpine
+
+## Данные для доступа к админ зоне:
+сайт 
+
+логин - admin
+
+пароль - 1234qwer
 
 ## Описание проекта:
 

@@ -2,7 +2,9 @@
 Module for registering "recipe" app models in the admin interface.
 """
 from django.contrib import admin
+from django.contrib.auth.models import Group
 from django.utils.safestring import mark_safe
+from rest_framework.authtoken.models import TokenProxy
 
 from .models import (
     Tag,
@@ -18,6 +20,9 @@ admin.site.site_header = (
 )
 
 admin.site.empty_value_display = '-empty-'
+
+admin.site.unregister(Group)
+admin.site.unregister(TokenProxy)
 
 
 class IngredientsInRecipeInline(admin.StackedInline):
@@ -38,6 +43,7 @@ class IngredientInRecipeAdmin(admin.ModelAdmin):
     """Represents the "IngredientsRecipe" model in the admin interface."""
 
     list_display = (
+        'id',
         'ingredient',
         'recipe',
         'amount',
@@ -60,18 +66,25 @@ class TagAdmin(admin.ModelAdmin):
     """Represents the "Tag" model in the admin interface."""
 
     list_display = (
+        'id',
         'name',
         'color',
         'slug',
     )
     list_filter = (
         'name',
+        'color',
+        'slug',
     )
     search_fields = (
         'name',
+        'color',
+        'slug',
     )
     ordering = (
         'name',
+        'color',
+        'slug',
     )
 
 
@@ -80,6 +93,7 @@ class IngredientAdmin(admin.ModelAdmin):
     """Represents the "Ingredient" model in the admin interface."""
 
     list_display = (
+        'id',
         'name',
         'measurement_unit',
     )
@@ -99,9 +113,12 @@ class RecipeAdmin(admin.ModelAdmin):
         IngredientsInRecipeInline,
     )
     list_display = (
+        'id',
         'name',
         'author',
         'get_favorites',
+        'get_ingredients',
+        'get_image',
     )
     search_fields = (
         'name',
@@ -146,6 +163,7 @@ class FavoriteAdmin(admin.ModelAdmin):
     """Represents the "Favorite" model in the admin interface."""
 
     list_display = (
+        'id',
         'user',
         'recipe',
     )
@@ -166,6 +184,7 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     """Represents the "ShoppingCart" model in the admin interface."""
 
     list_display = (
+        'id',
         'user',
         'recipe',
     )

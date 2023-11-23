@@ -3,8 +3,6 @@ A module for registering and configuring "users"
 application models in the administrator interface.
 """
 from django.contrib import admin
-from django.contrib.auth.models import Group
-from rest_framework.authtoken.models import TokenProxy
 
 from .models import CustomUser, Follow
 
@@ -15,15 +13,13 @@ admin.site.site_header = (
 
 admin.site.empty_value_display = '-empty-'
 
-admin.site.unregister(Group)
-admin.site.unregister(TokenProxy)
-
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
     """Represents the "CustomUser" model in the admin interface."""
 
     list_display = (
+        'id',
         'email',
         'username',
         'first_name',
@@ -58,10 +54,15 @@ class FollowAdmin(admin.ModelAdmin):
     """Represents the "Subscribe" model in the admin interface."""
 
     list_display = (
+        'id',
         'user',
         'author',
     )
     list_filter = (
+        'user',
+        'author',
+    )
+    search_fields = (
         'user',
         'author',
     )

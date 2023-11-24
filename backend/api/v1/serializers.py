@@ -313,7 +313,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {'tags': 'Tags should not be repeated!'}
             )
-        
+
         # Checking ingredients.
         ingredients = data.get('ingredients')
         if not ingredients:

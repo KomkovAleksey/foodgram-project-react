@@ -11,12 +11,14 @@ volumes:
 services:
   db:
     image: postgres:13
+    restart: always
     env_file: .env
     volumes:
       - db-data:/var/lib/postgresql/data
 
   backend:
     image: alexkomkov/foodgram_backend
+    restart: always
     env_file: .env
     volumes:
       - static_value:/app/backend_static/
@@ -30,7 +32,8 @@ services:
       - ../frontend/:/app/result_build/
 
   nginx:
-    image: nginx:1.19.3
+    image: alexkomkov/foodgram_gateway
+    restart: always
     ports:
       - "80:80"
     volumes:
@@ -40,5 +43,6 @@ services:
       - static_value:/var/html/backend_static/
       - media_value:/var/html/backend_media/
     depends_on:
+      - db
       - backend
       - frontend

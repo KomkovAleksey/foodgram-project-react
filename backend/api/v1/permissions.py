@@ -7,7 +7,7 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 class IsAuthorOrReadOnly(BasePermission):
     """Author rights or read only."""
 
-    message = "Author's rights required!"
+    message = 'Author rights required!'
 
     def has_permission(self, request, view):
         return (

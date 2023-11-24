@@ -15,13 +15,13 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
   backend:
-    image: alexkomkov/kittygram_backend
+    image: alexkomkov/foodgram_backend
     env_file: .env
     volumes:
       - static_value:/app/backend_static/
       - media_value:/app/backend_media/
   frontend:
-    image: alexkomkov/kittygram_frontend
+    image: alexkomkov/foodgram_frontend
     env_file: .env
     command: cp -r /app/build/. /frontend_static/
     volumes:

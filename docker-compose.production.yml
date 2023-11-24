@@ -1,0 +1,48 @@
+version: '3.8'
+
+name: prodfoodgram
+
+volumes:
+  static_value:
+  media_value:
+  db-data:
+
+
+services:
+  db:
+    image: postgres:13
+    restart: always
+    env_file: .env
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  backend:
+    image: alexkomkov/foodgram_backend
+    restart: always
+    env_file: .env
+    volumes:
+      - static_value:/app/backend_static/
+      - media_value:/app/backend_media/
+
+  frontend:
+    image: alexkomkov/foodgram_frontend
+    env_file: .env
+    command: cp -r /app/build/. /frontend_static/
+    volumes:
+      - ../frontend/:/app/result_build/
+
+  nginx:
+    image: alexkomkov/foodgram_gateway
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ../frontend/build:/usr/share/nginx/html/
+      - ../docs/:/usr/share/nginx/html/api/docs/
+      - static_value:/var/html/backend_static/
+      - media_value:/var/html/backend_media/
+    depends_on:
+      - db
+      - backend
+      - frontend

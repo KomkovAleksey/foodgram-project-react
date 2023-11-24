@@ -335,21 +335,6 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 {'ingredients': 'There can be no duplicate ingredients!'}
             )
 
-        # Checking the cooking time.
-        cooking_time = data.get('cooking_time')
-        if not cooking_time:
-            raise serializers.ValidationError(
-                {'cooking_time': 'Add cooking time to recipe.'}
-            )
-        if cooking_time < ConstantRecipes.MIN_COOKING_TIME:
-            raise serializers.ValidationError(
-                {'Cooking time': 'Cooking time must be >=1 minute.'}
-            )
-        if cooking_time > ConstantRecipes.MAX_COOKING_TIME:
-            raise serializers.ValidationError(
-                {'Cooking time': 'Cooking time exceeds all norms!'}
-            )
-
         # Checking recipe image.
         image = data.get('image')
         if not image:

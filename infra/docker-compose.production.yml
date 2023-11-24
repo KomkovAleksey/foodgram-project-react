@@ -14,18 +14,21 @@ services:
     env_file: .env
     volumes:
       - db-data:/var/lib/postgresql/data
+
   backend:
     image: alexkomkov/foodgram_backend
     env_file: .env
     volumes:
       - static_value:/app/backend_static/
       - media_value:/app/backend_media/
+
   frontend:
     image: alexkomkov/foodgram_frontend
     env_file: .env
     command: cp -r /app/build/. /frontend_static/
     volumes:
       - ../frontend/:/app/result_build/
+
   nginx:
     image: nginx:1.19.3
     ports:

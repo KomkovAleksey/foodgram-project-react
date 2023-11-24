@@ -12,14 +12,14 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# SECURITY WARNING: keep the secret key used in production secret!
 INSECURE_KEY = 'django-insecure-0eikswwglid=ukts4l2_b=676m!-q_%154%2z@&l3)n6)cp3#c'
 SECRET_KEY = os.getenv('SECRET_KEY', INSECURE_KEY)
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(' ')
+DEVELOP = os.getenv('DEVELOP', 'False') == 'True'
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(', ')
 
 
 INSTALLED_APPS = [
@@ -79,7 +79,7 @@ WSGI_APPLICATION = "foodgram_backend.wsgi.application"
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
-if not DEBUG:
+if not DEVELOP:
     DATABASES = {
         "default": {
             "ENGINE": os.getenv("DB_ENGINE"),

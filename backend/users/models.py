@@ -3,22 +3,19 @@ Module for creating, configuring and managing `users' app models.
 """
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
 from django.db import models
 
 from core.constants import HelpTextUsers, ConstantUsers
-from core.validators import validate_username
+from core.validators import validate_username, UsernameInvChar
 
 
 class CustomUser(AbstractUser):
     """CustomUser model class."""
 
     USER = 'user'
-    MODERATOR = 'moderator'
     ADMIN = 'admin'
     CUSTOM_USER_ROLE_CHOICES = [
         (USER, 'user'),
-        (MODERATOR, 'moderator'),
         (ADMIN, 'admin'),
     ]
 
@@ -42,10 +39,7 @@ class CustomUser(AbstractUser):
         help_text=HelpTextUsers.HELP_USERNAME,
         validators=(
             validate_username,
-            RegexValidator(
-                regex=r'^[\w.@+-]+$',
-                message='The username contains invalid characters.',
-            ),
+            UsernameInvChar(),
         )
     )
     first_name = models.CharField(
@@ -87,10 +81,6 @@ class CustomUser(AbstractUser):
     @property
     def is_admin_or_super_user(self):
         return self.role == self.ADMIN or self.is_superuser
-
-    @property
-    def is_moderator(self):
-        return self.role == self.MODERATOR
 
     def __str__(self):
         return f'{self.get_full_name()}'

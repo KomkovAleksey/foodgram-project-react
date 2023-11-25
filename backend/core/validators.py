@@ -1,12 +1,15 @@
+"""
+Validators.
+"""
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
 
-class RegexUsername(RegexValidator):
-    """Checking the username for invalid characters."""
+class UsernameInvChar(RegexValidator):
+    """Username invalid characters validation."""
 
-    regex = '^[\w.@+-]+$'
-    message = 'The username contains invalid characters.',
+    regex = r'^[\w.@+-]+$'
+    message = 'The username contains invalid characters.'
 
 
 def validate_username(value):
@@ -16,4 +19,5 @@ def validate_username(value):
         raise ValidationError(
             {'username': "You cannot use 'me' as the username."}
         )
+
     return value

@@ -25,7 +25,6 @@ from recipes.models import (
     IngredientInRecipe
 )
 from users.models import Follow
-
 from .pagination import CustomPagination
 from .permissions import IsAuthorOrReadOnly, IsAdminUserOrReadOnly
 from .filters import IngredientFilter, RecipeFilter
@@ -72,9 +71,8 @@ class CustomUserViewSet(UserViewSet):
         permission_classes=[IsAuthenticated],
     )
     def subscribe(self, request, id):
-        user = request.user
         author = get_object_or_404(User, pk=id)
-        Subscription = Follow.objects.filter(user=user, author=author)
+        Subscription = Follow.objects.filter(user=request.user, author=author)
 
         if request.method == 'POST':
             serializer = SubscriptionSerializer(
@@ -86,23 +84,18 @@ class CustomUserViewSet(UserViewSet):
                     {'subscribe': 'You are already subscribed to this user.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            if user == author:
+            if request.user == author:
                 return Response(
                     {'subscribe': "You can't subscribe to yourself."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            Follow.objects.create(user=user, author=author)
+            Follow.objects.create(user=request.user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if not Subscription.exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        Subscription.delete()
 
-        if request.method == 'DELETE':
-            if not Subscription.exists():
-                return Response(
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            Subscription.delete()
-            return Response(
-                status=status.HTTP_204_NO_CONTENT
-            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
@@ -212,9 +205,7 @@ class RecipeViewSet(ModelViewSet):
         """
         if request.method == 'POST':
             return self.add_recipe(Favorite, request, pk)
-        if request.method == 'DELETE':
-
-            return self.delete_recipe(Favorite, request, pk)
+        return self.delete_recipe(Favorite, request, pk)
 
     @action(
         detail=True,
@@ -228,9 +219,7 @@ class RecipeViewSet(ModelViewSet):
         """
         if request.method == 'POST':
             return self.add_recipe(ShoppingCart, request, pk)
-        if request.method == 'DELETE':
-
-            return self.delete_recipe(ShoppingCart, request, pk)
+        return self.delete_recipe(ShoppingCart, request, pk)
 
     @action(
         detail=False,

@@ -52,10 +52,8 @@ class CustomUserSerializer(UserSerializer):
             'username',
             'first_name',
             'last_name',
-            'password',
             'is_subscribed',
         )
-        extra_kwargs = {"password": {"write_only": True}}
 
     def get_is_subscribed(self, obj):
         """Checking a user's subscription to other users."""
@@ -93,15 +91,9 @@ class SubscriptionSerializer(CustomUserSerializer):
 
     class Meta(CustomUserSerializer.Meta):
         model = User
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
+        fields = CustomUserSerializer.Meta.fields + (
+            'recipes_count',
             'recipes',
-            'recipes_count'
         )
         read_only_fields = (
             'email',
@@ -171,7 +163,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientInRecipeSerializer(serializers.ModelSerializer):
-    """ Serializer for model IngredientInRecipe. """
+    """Serializer for model IngredientInRecipe."""
 
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
@@ -186,12 +178,6 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
             'name',
             'measurement_unit',
             'amount',
-        )
-        validators = (
-            validators.UniqueTogetherValidator(
-                queryset=IngredientInRecipe.objects.all(),
-                fields=('ingredient', 'recipe')
-            ),
         )
 
 
@@ -223,8 +209,9 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         read_only=True,
         many=True,
     )
-    ingredients = serializers.SerializerMethodField(
-        method_name='get_ingredients',
+    ingredients = IngredientInRecipeSerializer(
+        source='amount',
+        many=True,
     )
     image = Base64ImageField(required=True)
     is_favorited = serializers.SerializerMethodField(
@@ -250,12 +237,6 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             'is_favorited',
             'is_in_shopping_cart',
         )
-
-    def get_ingredients(self, obj):
-        """Gets a list of ingredients for a recipe."""
-        ingredients = IngredientInRecipe.objects.filter(recipe=obj)
-
-        return IngredientInRecipeSerializer(ingredients, many=True).data
 
     def in_list(self, obj, model):
         """Checking whether the recipe is on the list."""
@@ -322,7 +303,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             )
         for ingredient in ingredients:
             ingredient_name = ingredient['id']
-        if int(ingredient['amount']) <= 0:
+        if int(ingredient['amount']) <= ConstantRecipes.INCORRECT_AMOUNT:
             raise serializers.ValidationError(
                 {'ingredients': f'Incorrect quantity for {ingredient_name}'}
             )
@@ -330,7 +311,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {'ingredients': 'must be a whole number!'}
             )
-        if (len(set(item["id"] for item in ingredients)) != len(ingredients)):
+        if (len(set(item['id'] for item in ingredients)) != len(ingredients)):
             raise serializers.ValidationError(
                 {'ingredients': 'There can be no duplicate ingredients!'}
             )
@@ -354,7 +335,6 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 amount=ingredient['amount']
             ) for ingredient in ingredients
         ]
-        ingredient_list.sort(key=lambda item: item.ingredient.name)
         IngredientInRecipe.objects.bulk_create(ingredient_list)
 
     @atomic

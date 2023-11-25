@@ -63,3 +63,4 @@ class ConstantRecipes():
     # IngredientInRecipe model.
     MIN_AMOUNT = 1
     MAX_AMOUNT = 9000
+    INCORRECT_AMOUNT = 0

@@ -2,6 +2,9 @@
 Constants.
 """
 
+# CustomPagination
+MAX_PAGE_SIZE = 6
+
 
 class HelpTextRecipes():
     """Help text for recipes app models in admin zone."""

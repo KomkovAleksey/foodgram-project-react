@@ -5,7 +5,7 @@ from django.core.validators import RegexValidator
 class RegexUsername(RegexValidator):
     """Checking the username for invalid characters."""
 
-    regex = r'^[\w.@+-]+$'
+    regex = '^[\w.@+-]+$'
     message = 'The username contains invalid characters.',
 
 

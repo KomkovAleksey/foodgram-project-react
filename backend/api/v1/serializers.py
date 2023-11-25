@@ -2,9 +2,10 @@
 Module for creating, configuring and managing 'recipes' app serializers
 """
 import webcolors
+from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.contrib.auth import get_user_model
-from rest_framework import serializers, validators
+from rest_framework import serializers, status
 from django.db.transaction import atomic
 from drf_extra_fields.fields import Base64ImageField
 
@@ -100,6 +101,24 @@ class SubscriptionSerializer(CustomUserSerializer):
             'first_name',
             'last_name',
         )
+
+    def validate(self, data):
+        author_id = self.context.get(
+            'request').parser_context.get('kwargs').get('id')
+        author = get_object_or_404(User, id=author_id)
+        user = self.context.get('request').user
+        if Follow.objects.filter(user=user, author=author).exists():
+            raise serializers.ValidationError(
+                {'subscribe': 'You are already subscribed to this user.'},
+                code=status.HTTP_400_BAD_REQUEST
+            )
+        if user == author:
+            raise serializers.ValidationError(
+                {'subscribe': 'No self-subscription!'},
+                code=status.HTTP_400_BAD_REQUEST
+            )
+
+        return super().validate(data)
 
     def get_recipes(self, obj):
         """Get the number of recipes for a specific author."""

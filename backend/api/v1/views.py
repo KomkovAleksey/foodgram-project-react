@@ -72,28 +72,18 @@ class CustomUserViewSet(UserViewSet):
     )
     def subscribe(self, request, id):
         author = get_object_or_404(User, pk=id)
-        Subscription = Follow.objects.filter(user=request.user, author=author)
-
+        subscription = Follow.objects.filter(user=request.user, author=author)
         if request.method == 'POST':
             serializer = SubscriptionSerializer(
                 author, data=request.data, context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
-            if Subscription.exists():
-                return Response(
-                    {'subscribe': 'You are already subscribed to this user.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            if request.user == author:
-                return Response(
-                    {'subscribe': "You can't subscribe to yourself."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            serializer.save
             Follow.objects.create(user=request.user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if not Subscription.exists():
+        if not subscription.exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        Subscription.delete()
+        subscription.delete()
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -104,8 +94,9 @@ class CustomUserViewSet(UserViewSet):
     )
     def me(self, request):
         """View subscriptions to authors. My subscriptions."""
-        user = request.user
-        serializer = CustomUserSerializer(user, context={"request": request})
+        serializer = CustomUserSerializer(
+            request.user, context={"request": request}
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

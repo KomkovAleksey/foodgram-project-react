@@ -157,20 +157,21 @@ class RecipeViewSet(ModelViewSet):
 
     def add_recipe(self, model, request, pk):
         """Adds recipes to the list."""
-        user = self.request.user
         if not Recipe.objects.filter(id=pk).exists():
             return Response(
                 {'add recipe': 'You are trying to add a non-existent recipe!'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         recipe = Recipe.objects.get(id=pk)
-        recipe_in_list = model.objects.filter(recipe=recipe, user=user)
+        recipe_in_list = model.objects.filter(
+            recipe=recipe, user=self.request.user
+        )
         if recipe_in_list.exists():
             return Response(
                 {'add recipe': 'The recipe has already been added to list.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        model.objects.create(recipe=recipe, user=user)
+        model.objects.create(recipe=recipe, user=self.request.user)
         serializer = ShortRecipeSerializer(recipe)
 
         return Response(
@@ -181,8 +182,9 @@ class RecipeViewSet(ModelViewSet):
     def delete_recipe(self, model, request, pk):
         """Removes recipes from the list."""
         recipe = get_object_or_404(Recipe, pk=pk)
-        user = self.request.user
-        recipe_in_list = model.objects.filter(recipe=recipe, user=user)
+        recipe_in_list = model.objects.filter(
+            recipe=recipe, user=self.request.user
+        )
         if recipe_in_list.exists():
             recipe_in_list.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
@@ -228,11 +230,10 @@ class RecipeViewSet(ModelViewSet):
     )
     def download_shopping_cart(self, request):
         """Downloads a shopping list."""
-        user = request.user
-        if not user.shopping_cart.exists():
+        if not self.request.user.shopping_cart.exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
         ingredients = IngredientInRecipe.objects.filter(
-            recipe__shopping_cart__user=user
+            recipe__shopping_cart__user=self.request.user
         ).values(
             'ingredient__name',
             'ingredient__measurement_unit'
@@ -250,7 +251,7 @@ class RecipeViewSet(ModelViewSet):
             f'{ingredient["ingredient__measurement_unit"]}'
             for ingredient in ingredients
         ])
-        filename = f'{user}_shopping_list.txt'
+        filename = f'{self.request.user}_shopping_list.txt'
         content_type = 'text/plain,charset=utf8'
         response = HttpResponse(shopping_list, content_type=content_type)
         response['Content-Disposition'] = f'attachment; filename={filename}'

@@ -58,10 +58,9 @@ class CustomUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         """Checking a user's subscription to other users."""
         user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
 
-        return Follow.objects.filter(user=user, author=obj).exists()
+        return (user.is_authenticated
+                and user.follower.filter(user=user, author=obj).exists())
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
@@ -82,8 +81,8 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 class SubscriptionSerializer(CustomUserSerializer):
     """Serializer about user-created subscriptions and recipes."""
 
-    recipes_count = serializers.SerializerMethodField(
-        method_name='get_recipes_count'
+    recipes_count = serializers.ReadOnlyField(
+        source='recipes.count'
     )
     recipes = serializers.SerializerMethodField(
         method_name='get_recipes'
@@ -102,18 +101,18 @@ class SubscriptionSerializer(CustomUserSerializer):
             'last_name',
         )
 
-    def get_recipes_count(self, obj):
-        """Getting the total number of recipes for current author."""
-        return obj.recipes.count()
-
     def get_recipes(self, obj):
         """Get the number of recipes for a specific author."""
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
+        obj_recipes = obj.recipes.all()
         if limit:
-            recipes = obj.recipes.all()[: int(limit)]
+            try:
+                recipes = obj_recipes[:int(limit)]
+            except ValueError:
+                pass
         else:
-            recipes = obj.recipes.all()
+            recipes = obj_recipes
 
         return ShortRecipeSerializer(recipes, many=True, read_only=True).data
 

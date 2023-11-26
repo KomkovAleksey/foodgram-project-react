@@ -83,8 +83,8 @@ if not DEVELOP:
     DATABASES = {
         "default": {
             "ENGINE": os.getenv("DB_ENGINE", default='django.db.backends.postgresql'),
-            "NAME": os.getenv("DB_NAME", default='postgres'),
-            "USER": os.getenv("POSTGRES_USER", default='postgres'),
+            "NAME": os.getenv("DB_NAME", default='django'),
+            "USER": os.getenv("POSTGRES_USER", default='django'),
             "PASSWORD": os.getenv("POSTGRES_PASSWORD", default='postgres'),
             "HOST": os.getenv("DB_HOST", default='db'),
             "PORT": os.getenv("DB_PORT", default='5432')
@@ -151,10 +151,10 @@ USE_I18N = True
 USE_TZ = True
 
 
-STATIC_URL = '/backend_static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'backend_static/')
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'collected_static'
 
-MEDIA_URL = '/backend_media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'backend_media/')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

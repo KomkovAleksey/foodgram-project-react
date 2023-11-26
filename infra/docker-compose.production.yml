@@ -1,7 +1,5 @@
 version: '3.8'
 
-name: prodfoodgram
-
 volumes:
   static_value:
   media_value:

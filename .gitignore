@@ -139,3 +139,4 @@ static/
 backend_static/
 media/
 backend_media/
+collected_static

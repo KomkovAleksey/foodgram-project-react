@@ -5,7 +5,7 @@ import webcolors
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.contrib.auth import get_user_model
-from rest_framework import serializers, status
+from rest_framework import serializers, status, exceptions
 from django.db.transaction import atomic
 from drf_extra_fields.fields import Base64ImageField
 
@@ -358,9 +358,10 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     @atomic
     def create(self, validated_data):
         """Creates a recipe."""
+        current_user = self.context['request'].user
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
+        recipe = Recipe.objects.create(**validated_data, author=current_user)
         recipe.tags.set(tags)
         recipe.save()
         self.create_IngredientInRecipe_objects(ingredients, recipe)
@@ -385,3 +386,57 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         )
 
         return serializer.data
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    """Serializer for model 'Favorite'."""
+
+    recipe = serializers.PrimaryKeyRelatedField(
+        queryset=Recipe.objects.all()
+    )
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all()
+    )
+
+    class Meta:
+        model = Favorite
+        fields = ('recipe', 'user')
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=('recipe', 'user'),
+                message='The recipe has already been added to your list.'
+            )
+        ]
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        context = {'reauest': request}
+        return ShortRecipeSerializer(instance.recipe, context=context).data
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    """Serializer for model 'ShoppingCar'."""
+
+    recipe = serializers.PrimaryKeyRelatedField(
+        queryset=Recipe.objects.all()
+    )
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all()
+    )
+
+    class Meta:
+        model = ShoppingCart
+        fields = ('recipe', 'user')
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=ShoppingCart.objects.all(),
+                fields=('recipe', 'user'),
+                message='The recipe has already been added to your list.'
+            )
+        ]
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        context = {'reauest': request}
+        return ShortRecipeSerializer(instance.recipe, context=context).data

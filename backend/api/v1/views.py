@@ -29,7 +29,8 @@ from .pagination import CustomPagination
 from .permissions import IsAuthorOrReadOnly, IsAdminUserOrReadOnly
 from .filters import IngredientFilter, RecipeFilter
 from .serializers import (
-    ShortRecipeSerializer,
+    FavoriteSerializer,
+    ShoppingCartSerializer,
     IngredientSerializer,
     TagSerializer,
     RecipeReadSerializer,
@@ -119,7 +120,8 @@ class TagViewSet(ReadOnlyModelViewSet):
 class RecipeViewSet(ModelViewSet):
     """Viewset for 'Recipes' model."""
 
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.select_related('author').prefetch_related(
+        'tags', 'ingredients')
     permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = CustomPagination
     filter_backends = (DjangoFilterBackend,)
@@ -132,54 +134,29 @@ class RecipeViewSet(ModelViewSet):
 
         return RecipeCreateUpdateSerializer
 
-    def perform_create(self, serializer):
-        """
-        Automatically saves the recipe author
-        when creating a new recipe.
-        """
-        serializer.save(author=self.request.user)
-
-    def perform_update(self, serializer):
-        """
-        Automatically saves the recipe author
-        when updating a recipe.
-        """
-        serializer.save(author=self.request.user)
-
-    def add_recipe(self, model, request, pk):
+    @staticmethod
+    def add_recipe(serializer_class, id, request):
         """Adds recipes to the list."""
-        if not Recipe.objects.filter(id=pk).exists():
-            return Response(
-                {'add recipe': 'You are trying to add a non-existent recipe!'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        recipe = Recipe.objects.get(id=pk)
-        recipe_in_list = model.objects.filter(
-            recipe=recipe, user=self.request.user
+        serializer = serializer_class(
+            data={'user': request.user.id, 'recipe': id},
+            context={'request': request},
         )
-        if recipe_in_list.exists():
-            return Response(
-                {'add recipe': 'The recipe has already been added to list.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        model.objects.create(recipe=recipe, user=self.request.user)
-        serializer = ShortRecipeSerializer(recipe)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        return Response(
-            data=serializer.data,
-            status=status.HTTP_201_CREATED
-        )
-
-    def delete_recipe(self, model, request, pk):
+    @staticmethod
+    def delete_recipe(model, id, request):
         """Removes recipes from the list."""
-        recipe = get_object_or_404(Recipe, pk=pk)
+        recipe = get_object_or_404(Recipe, pk=id)
+        user = request.user
+        recipe_in_list = model.objects.filter(recipe=recipe, user=user)
         recipe_in_list = model.objects.filter(
-            recipe=recipe, user=self.request.user
+            user=request.user, recipe_id=id
         )
         if recipe_in_list.exists():
             recipe_in_list.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-
         return Response({
             'recipe': 'You are trying to delete a recipe that does not exist.'
         },
@@ -189,7 +166,7 @@ class RecipeViewSet(ModelViewSet):
     @action(
         detail=True,
         methods=('post', 'delete'),
-        permission_classes=(IsAuthenticated,)
+        permission_classes=[IsAuthenticated],
     )
     def favorite(self, request, pk=None):
         """
@@ -197,22 +174,22 @@ class RecipeViewSet(ModelViewSet):
         adds or removes a recipe from favorites.
         """
         if request.method == 'POST':
-            return self.add_recipe(Favorite, request, pk)
-        return self.delete_recipe(Favorite, request, pk)
+            return self.add_recipe(FavoriteSerializer, pk, request)
+        return self.delete_recipe(Favorite, pk, request)
 
     @action(
         detail=True,
         methods=('post', 'delete'),
-        permission_classes=(IsAuthenticated,)
+        permission_classes=[IsAuthenticated],
     )
-    def shopping_cart(self, request, pk):
+    def shopping_cart(self, request, pk=None):
         """
         Depending on the method,
         adds or removes a recipe from the shopping list.
         """
         if request.method == 'POST':
-            return self.add_recipe(ShoppingCart, request, pk)
-        return self.delete_recipe(ShoppingCart, request, pk)
+            return self.add_recipe(ShoppingCartSerializer, pk, request)
+        return self.delete_recipe(ShoppingCart, pk, request)
 
     @action(
         detail=False,

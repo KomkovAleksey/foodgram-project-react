@@ -5,7 +5,7 @@ import webcolors
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.contrib.auth import get_user_model
-from rest_framework import serializers, status, exceptions
+from rest_framework import serializers, status
 from django.db.transaction import atomic
 from drf_extra_fields.fields import Base64ImageField
 

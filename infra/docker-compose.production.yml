@@ -33,7 +33,7 @@ services:
     image: alexkomkov/foodgram_gateway
     restart: always
     ports:
-      - "80:80"
+      - "8000:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d
       - ../frontend/build:/usr/share/nginx/html/

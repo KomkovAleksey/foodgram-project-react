@@ -4,6 +4,7 @@ services:
 
   db:
     image: postgres:13.0-alpine
+    restart: always
     env_file:  ../.env
     volumes:
       - db-data:/var/lib/postgresql/data/
@@ -12,10 +13,11 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
+    restart: always
     env_file: ../.env
     volumes:
-      - static_value:/app/static/
-      - media_value:/app/media/
+      - static_value:/app/backend_static/
+      - media_value:/app/backend_media/
       - ../backend:/app/
     depends_on:
       - db
@@ -32,11 +34,11 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/
-      - ../docs/redoc.html:/usr/share/nginx/html/api/docs/redoc.html
-      - static_value:/var/html/static/
-      - media_value:/var/html/media/
+      - ../docs/:/usr/share/nginx/html/api/docs/
+      - static_value:/var/html/backend_static/
+      - media_value:/var/html/backend_media/
     depends_on:
       - backend
       - frontend

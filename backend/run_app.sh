@@ -5,4 +5,4 @@ done;
     echo "connected to the database";
 
 python manage.py collectstatic --noinput;
-gunicorn -b 0:80 foodgram_backend.wsgi;
+gunicorn -b 0:8000 foodgram_backend.wsgi;

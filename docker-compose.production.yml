@@ -17,7 +17,7 @@ services:
     image: alexkomkov/foodgram_backend
     env_file: .env
     volumes:
-      - static_value:/app/backend_static/
+      - static_value:/app/backend_static/static/
       - media_value:/app/backend_media/
 
   frontend:

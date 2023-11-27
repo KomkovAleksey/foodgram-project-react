@@ -37,12 +37,9 @@ services:
       - static:/frontend_static
 
   nginx:
-    image: nginx:1.19.3
+    build: ./infra/
     restart: always
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/
-      - ../frontend/build:/usr/share/nginx/html/
-      - ../docs/:/usr/share/nginx/html/api/docs/
       - static:/staticfiles/
       - media:/media/
     ports:
@@ -50,3 +47,4 @@ services:
     depends_on:
       - backend
       - frontend
+      

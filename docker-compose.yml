@@ -1,49 +1,49 @@
 version: '3.8'
 
+volumes:
+  pg_data:
+  static:
+  media:
+
 services:
 
   db:
     image: postgres:13.0-alpine
     restart: always
-    env_file:  ../.env
+    env_file: .env
     volumes:
-      - db-data:/var/lib/postgresql/data/
+      - pg_data:/var/lib/postgresql/data
 
   backend:
     build:
-      context: ../backend
+      context: ./backend
       dockerfile: Dockerfile
     restart: always
-    env_file: ../.env
+    env_file: .env
     volumes:
-      - static_value:/app/backend_static/static/
-      - media_value:/app/backend_media/
-      - ../backend:/app/
+      - static:/backend_static
+      - media:/app/media
+      - ./backend:/app/
     depends_on:
       - db
 
   frontend:
-    build:
-      context: ../frontend
+    env_file: .env
+    build: 
+      context: ./frontend
       dockerfile: Dockerfile
+    command: cp -r /app/build/. /frontend_static/
     volumes:
-      - ../frontend/:/app/result_build/
+      - static:/frontend_static
 
   nginx:
-    image: nginx:1.19.3
-    ports:
-      - "8000:80"
+    build: ./infra/
+    restart: always
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d
-      - ../frontend/build:/usr/share/nginx/html/
-      - ../docs/:/usr/share/nginx/html/api/docs/
-      - static_value:/var/html/backend_static/
-      - media_value:/var/html/backend_media/
+      - static:/staticfiles/
+      - media:/media/
+    ports:
+      - "80:80"
     depends_on:
       - backend
       - frontend
-
-volumes:
-  static_value:
-  media_value:
-  db-data:

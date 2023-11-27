@@ -19,8 +19,8 @@ services:
     restart: always
     env_file: .env
     volumes:
-      - static_value:/app/backend_static/
-      - media_value:/app/backend_media/
+      - static_value:/app/static/
+      - media_value:/app/media/
 
   frontend:
     image: alexkomkov/foodgram_frontend
@@ -38,8 +38,8 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
-      - static_value:/var/html/backend_static/
-      - media_value:/var/html/backend_media/
+      - static_value:/var/html/static/
+      - media_value:/var/html/media/
     depends_on:
       - db
       - backend

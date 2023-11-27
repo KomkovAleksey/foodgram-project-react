@@ -33,10 +33,11 @@ services:
   nginx:
     image: alexkomkov/foodgram_gateway
     volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/
+      - ../frontend/build:/usr/share/nginx/html/
+      - ../docs/:/usr/share/nginx/html/api/docs/
       - static:/staticfiles/
-      - media:/media/    
-    ports:
-      - "8000:80"
+      - media:/media/
     depends_on:
       - db
       - backend

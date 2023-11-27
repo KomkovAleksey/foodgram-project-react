@@ -4,8 +4,11 @@ while ! nc -z db 5432;
 done;
     echo "connected to the database";
 
+pythob manage.py makemigrations recipes;
+pythob manage.py makemigrations users;
 python manage.py migrate recipes;
 python manage.py migrate users;
+pythob manage.py makemigrations;
 python manage.py migrate;
 python manage.py import_ingredients_data;
 python manage.py import_tags_data;

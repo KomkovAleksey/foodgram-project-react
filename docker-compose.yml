@@ -37,9 +37,12 @@ services:
       - static:/frontend_static
 
   nginx:
-    build: ./infra/
+    image: nginx:1.19.3
     restart: always
     volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/
+      - ../frontend/build:/usr/share/nginx/html/
+      - ../docs/:/usr/share/nginx/html/api/docs/
       - static:/staticfiles/
       - media:/media/
     ports:

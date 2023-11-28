@@ -39,7 +39,7 @@ services:
       - static:/staticfiles/
       - media:/media/
     ports:
-      - "80:80"
+      - "8000:80"
     depends_on:
       - db
       - backend

@@ -1,8 +1,9 @@
+![status badge](https://github.com/KomkovAleksey/foodgram-project-react/actions/workflows/main.yml/badge.svg)
+
 # [Foodgram_project](#foodgrampromo.zapto.org)
 
 # hw05_final
 
-[![CI](https://github.com/KomkovAleksey/foodgram-project-react/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/KomkovAleksey/foodgram-project-react/actions/workflows/python-app.yml)
 
 ## Оглавление
 

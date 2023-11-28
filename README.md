@@ -1,8 +1,6 @@
 ![status badge](https://github.com/KomkovAleksey/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 
-# [Foodgram_project](#foodgrampromo.zapto.org)
-
-# hw05_final
+# [Foodgram_project](https://foodgrampromo.zapto.org/recipes)
 
 
 ## Оглавление
@@ -24,7 +22,7 @@
 - postgres:13.0-alpine
 
 ## Данные для доступа к админ зоне:
-сайт [foodgrampromo.zapto.org](#foodgrampromo.zapto.org)
+сайт [foodgrampromo.zapto.org](https://foodgrampromo.zapto.org/recipes)
 
 username - admin
 

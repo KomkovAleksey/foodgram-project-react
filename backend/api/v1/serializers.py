@@ -58,10 +58,14 @@ class CustomUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         """Checking a user's subscription to other users."""
+        request = self.context.get('request')
         user = self.context.get('request').user
 
-        return (user.is_authenticated
-                and user.follower.filter(user=user, author=obj).exists())
+        return (
+            request and request.user.is_authenticated
+            and Follow.objects.filter(
+                user_id=user.id, author_id=obj.id).exists()
+        )
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
@@ -102,36 +106,16 @@ class SubscriptionSerializer(CustomUserSerializer):
             'last_name',
         )
 
-    def validate(self, data):
-        author_id = self.context.get(
-            'request').parser_context.get('kwargs').get('id')
-        author = get_object_or_404(User, id=author_id)
-        user = self.context.get('request').user
-        if Follow.objects.filter(user=user, author=author).exists():
-            raise serializers.ValidationError(
-                {'subscribe': 'You are already subscribed to this user.'},
-                code=status.HTTP_400_BAD_REQUEST
-            )
-        if user == author:
-            raise serializers.ValidationError(
-                {'subscribe': 'No self-subscription!'},
-                code=status.HTTP_400_BAD_REQUEST
-            )
-
-        return super().validate(data)
-
     def get_recipes(self, obj):
         """Get the number of recipes for a specific author."""
         request = self.context.get('request')
         limit = request.GET.get('recipes_limit')
-        obj_recipes = obj.recipes.all()
+        recipes = obj.recipes.all()
         if limit:
             try:
-                recipes = obj_recipes[:int(limit)]
+                recipes = recipes[:int(limit)]
             except ValueError:
                 pass
-        else:
-            recipes = obj_recipes
 
         return ShortRecipeSerializer(recipes, many=True, read_only=True).data
 
@@ -259,10 +243,13 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     def in_list(self, obj, model):
         """Checking whether the recipe is on the list."""
         request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
 
-        return model.objects.filter(user=request.user, recipe=obj).exists()
+        return (
+            request and request.user.is_authenticated
+            and model.objects.filter(
+                user=request.user.id, recipe_id=obj.id
+            ).exists()
+        )
 
     def get_is_favorited(self, obj):
         """Checking whether the recipe is in your favorites."""

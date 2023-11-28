@@ -75,12 +75,22 @@ class CustomUserViewSet(UserViewSet):
         author = get_object_or_404(User, pk=id)
         subscription = Follow.objects.filter(user=request.user, author=author)
         if request.method == 'POST':
+            if subscription.exists():
+                return Response(
+                    {'subscribe': 'You are already subscribed to this user.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if request.user == author:
+                return Response(
+                    {'subscribe': "You can't subscribe to yourself."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            Follow.objects.create(user=request.user, author=author)
             serializer = SubscriptionSerializer(
                 author, data=request.data, context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
             serializer.save
-            Follow.objects.create(user=request.user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if not subscription.exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -149,11 +159,7 @@ class RecipeViewSet(ModelViewSet):
     def delete_recipe(model, id, request):
         """Removes recipes from the list."""
         recipe = get_object_or_404(Recipe, pk=id)
-        user = request.user
-        recipe_in_list = model.objects.filter(recipe=recipe, user=user)
-        recipe_in_list = model.objects.filter(
-            user=request.user, recipe_id=id
-        )
+        recipe_in_list = model.objects.filter(recipe=recipe, user=request.user,)
         if recipe_in_list.exists():
             recipe_in_list.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)

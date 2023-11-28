@@ -159,7 +159,9 @@ class RecipeViewSet(ModelViewSet):
     def delete_recipe(model, id, request):
         """Removes recipes from the list."""
         recipe = get_object_or_404(Recipe, pk=id)
-        recipe_in_list = model.objects.filter(recipe=recipe, user=request.user,)
+        recipe_in_list = model.objects.filter(
+            recipe=recipe, user=request.user,
+        )
         if recipe_in_list.exists():
             recipe_in_list.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)

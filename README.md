@@ -1,4 +1,9 @@
-# [Foodgram_project](#foodgrampromo.zapto.org) 
+# [Foodgram_project](#foodgrampromo.zapto.org)
+
+# hw05_final
+
+[![CI](https://github.com/KomkovAleksey/foodgram-project-react/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/KomkovAleksey/foodgram-project-react/actions/workflows/python-app.yml)
+
 ## Оглавление
 
 - [Автор](#Автор)
@@ -20,11 +25,11 @@
 ## Данные для доступа к админ зоне:
 сайт [foodgrampromo.zapto.org](#foodgrampromo.zapto.org)
 
-username - ritisbarauskas
+username - admin
 
-логин - kom90102603@yandex.ru
+логин - admin@admin.com
 
-пароль - 1234
+пароль - Praktikum+123
 
 ## Описание проекта:
 

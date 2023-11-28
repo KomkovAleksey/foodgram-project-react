@@ -117,7 +117,6 @@ class RecipeAdmin(admin.ModelAdmin):
         'name',
         'author',
         'get_favorites',
-        'get_ingredients',
         'get_image',
     )
     search_fields = (
@@ -142,6 +141,16 @@ class RecipeAdmin(admin.ModelAdmin):
         this recipe has been added to favorites.
         """
         return instance.favorites.count()
+
+    @admin.display(description='ingredients')
+    def get_ingredients(self, obj):
+        queryset = IngredientInRecipe.objects.filter(recipe_id=obj.id).all
+
+        return ', '.join([
+            f'{item.ingredient.name} {item.ingredient.amount} '
+            f'{item.ingredient.measurement_unit}'
+            for item in queryset
+        ])
 
     @admin.display(description='image')
     def get_image(self, obj):

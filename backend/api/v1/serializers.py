@@ -320,14 +320,11 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 {'ingredients': 'There can be no duplicate ingredients!'}
             )
 
-        # Checking recipe image.
-        image = data.get('image')
+    def validate_image(self, image):
+        """Checking image."""
         if not image:
-            raise serializers.ValidationError(
-                {'image': 'Add recipe images.'}
-            )
-
-        return super().validate(data)
+            raise serializers.ValidationError('Add recipe image!')
+        return image
 
     @staticmethod
     def create_IngredientInRecipe_objects(ingredients, recipe):

@@ -22,7 +22,7 @@
 
 username - ritisbarauskas
 
-логин -kom90102603@yandex.ru
+логин - kom90102603@yandex.ru
 
 пароль - 1234
 

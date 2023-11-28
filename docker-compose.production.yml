@@ -38,6 +38,8 @@ services:
       - ../docs/:/usr/share/nginx/html/api/docs/
       - static:/staticfiles/
       - media:/media/
+    ports:
+      - "8000:80"
     depends_on:
       - db
       - backend

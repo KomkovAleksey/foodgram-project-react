@@ -17,8 +17,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', INSECURE_KEY)
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-DEVELOP = True
-# DEVELOP = os.getenv('DEVELOP', 'False') == 'True'
+DEVELOP = os.getenv('DEVELOP', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(' ')
 

@@ -20,7 +20,9 @@
 ## Данные для доступа к админ зоне:
 сайт [foodgrampromo.zapto.org](#foodgrampromo.zapto.org)
 
-логин -ritisbarauskas
+username - ritisbarauskas
+
+логин -kom90102603@yandex.ru
 
 пароль - 1234
 

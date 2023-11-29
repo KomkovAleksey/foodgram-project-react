@@ -1,6 +1,5 @@
 ![status badge](https://github.com/KomkovAleksey/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 
-![status badge](https://foodgrampromo.zapto.org)
 
 # [Foodgram_project](https://foodgrampromo.zapto.org/recipes)
 

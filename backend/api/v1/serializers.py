@@ -329,7 +329,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         return image
 
     @staticmethod
-    def create_IngredientInRecipe_objects(ingredients, recipe):
+    def create_ingredient_in_recipe_objects(ingredients, recipe):
         """Creates ingredients for a recipe."""
         ingredient_list = [
             IngredientInRecipe(
@@ -349,7 +349,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         recipe = Recipe.objects.create(**validated_data, author=current_user)
         recipe.tags.set(tags)
         recipe.save()
-        self.create_IngredientInRecipe_objects(ingredients, recipe)
+        self.create_ingredient_in_recipe_objects(ingredients, recipe)
 
         return recipe
 
@@ -361,7 +361,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         instance.tags.clear()
         instance.tags.set(tags)
         IngredientInRecipe.objects.filter(recipe=instance).delete()
-        self.create_IngredientInRecipe_objects(ingredients, instance)
+        self.create_ingredient_in_recipe_objects(ingredients, instance)
 
         return super().update(instance, validated_data)
 

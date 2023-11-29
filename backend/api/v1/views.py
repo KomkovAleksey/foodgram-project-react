@@ -62,7 +62,7 @@ class CustomUserViewSet(UserViewSet):
         serializer = SubscriptionSerializer(
             subscribed_to,
             many=True,
-            context={"request": request}
+            context={'request': request}
         )
         return self.get_paginated_response(serializer.data)
 
@@ -82,7 +82,7 @@ class CustomUserViewSet(UserViewSet):
                 )
             if request.user == author:
                 return Response(
-                    {'subscribe': "You can't subscribe to yourself."},
+                    {'subscribe': 'No self subscription!'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             Follow.objects.create(user=request.user, author=author)
@@ -106,7 +106,7 @@ class CustomUserViewSet(UserViewSet):
     def me(self, request):
         """View subscriptions to authors. My subscriptions."""
         serializer = CustomUserSerializer(
-            request.user, context={"request": request}
+            request.user, context={'request': request}
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -218,9 +218,9 @@ class RecipeViewSet(ModelViewSet):
         ).annotate(amount=Sum('amount'))
         today = datetime.today()
         shopping_list = (
-            f"FoodGram Service\n"
-            f"Today's date.: {today:%Y-%m-%d}\n"
-            f"Your shopping list.:\n"
+            f'FoodGram Service\n'
+            f"Today date.: {today:%Y-%m-%d}\n"
+            f'Your shopping list.:\n'
         )
         shopping_list += '\n'.join([
             f'- {ingredient["ingredient__name"]} - {ingredient["amount"]} '

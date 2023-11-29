@@ -58,12 +58,12 @@ class CustomUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         """Checking a user's subscription to other users."""
         request = self.context.get('request')
-        user = self.context.get('request').user
 
         return (
             request and request.user.is_authenticated
             and Follow.objects.filter(
-                user_id=user.id, author_id=obj.id).exists()
+                user_id=request.user.id, author_id=obj.id
+            ).exists()
         )
 
 
@@ -319,6 +319,8 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {'ingredients': 'There can be no duplicate ingredients!'}
             )
+
+        return super().validate(data)
 
     def validate_image(self, image):
         """Checking image."""

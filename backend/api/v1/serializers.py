@@ -344,10 +344,12 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
         return super().validate(data)
 
-    def validate_image(self, image):
+    def validate_image(self, data):
         """Checking image."""
+        image = data.get('image')
         if not image:
             raise serializers.ValidationError('Add recipe image!')
+
         return image
 
     @staticmethod

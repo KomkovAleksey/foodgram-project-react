@@ -140,16 +140,6 @@ class RecipeAdmin(admin.ModelAdmin):
         """
         return instance.favorites.count()
 
-    @admin.display(description='ingredients')
-    def get_ingredients(self, obj):
-        queryset = IngredientInRecipe.objects.filter(recipe_id=obj.id).all
-
-        return ', '.join([
-            f'{item.ingredient.name} {item.ingredient.amount} '
-            f'{item.ingredient.measurement_unit}'
-            for item in queryset
-        ])
-
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):

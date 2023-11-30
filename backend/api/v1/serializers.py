@@ -214,6 +214,7 @@ class AddIngredientSerializer(serializers.ModelSerializer):
     amount = serializers.IntegerField(
         min_value=ConstantRecipes.MIN_AMOUNT,
         max_value=ConstantRecipes.MAX_AMOUNT,
+        error_messages={'AMOUNT': 'Incorrect amount of ingredients!'},
     )
 
     class Meta:
@@ -293,7 +294,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     image = Base64ImageField(required=True)
     cooking_time = serializers.IntegerField(
         min_value=ConstantRecipes.MIN_COOKING_TIME,
-        max_value=ConstantRecipes.MAX_COOKING_TIME
+        max_value=ConstantRecipes.MAX_COOKING_TIME,
     )
 
     class Meta:

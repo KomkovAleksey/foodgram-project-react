@@ -213,11 +213,7 @@ class AddIngredientSerializer(serializers.ModelSerializer):
     )
     amount = serializers.IntegerField(
         min_value=ConstantRecipes.MIN_AMOUNT,
-        error_messages={
-            'ingredient min': 'The number of ingredients must be >=1.'
-        },
         max_value=ConstantRecipes.MAX_AMOUNT,
-        error_messages={'ingredient max': 'Too many ingredients'},
     )
 
     class Meta:

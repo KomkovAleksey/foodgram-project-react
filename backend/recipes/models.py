@@ -169,11 +169,11 @@ class IngredientInRecipe(models.Model):
         validators=[
             MinValueValidator(
                 ConstantRecipes.MIN_AMOUNT,
-                {'ingredient min': 'The number of ingredients must be >=1.'}
+                'The number of ingredients must be >=1.'
             ),
             MaxValueValidator(
                 ConstantRecipes.MAX_AMOUNT,
-                {'ingredient max': 'Too many ingredients'}
+                'Too many ingredients'
             )
         ],
         default=1,

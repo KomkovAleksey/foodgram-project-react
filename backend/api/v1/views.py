@@ -30,6 +30,7 @@ from .permissions import IsAuthorOrReadOnly, IsAdminUserOrReadOnly
 from .filters import IngredientFilter, RecipeFilter
 from .serializers import (
     FavoriteSerializer,
+    FollowSerializer,
     ShoppingCartSerializer,
     IngredientSerializer,
     TagSerializer,
@@ -75,22 +76,15 @@ class CustomUserViewSet(UserViewSet):
         author = get_object_or_404(User, pk=id)
         subscription = Follow.objects.filter(user=request.user, author=author)
         if request.method == 'POST':
-            if subscription.exists():
-                return Response(
-                    {'subscribe': 'You are already subscribed to this user.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            if request.user == author:
-                return Response(
-                    {'subscribe': 'No self subscription!'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            Follow.objects.create(user=request.user, author=author)
-            serializer = SubscriptionSerializer(
-                author, data=request.data, context={'request': request}
+            serializer = FollowSerializer(
+                data={'user': request.user.id, 'author': author.id},
+                context={'request': request},
             )
             serializer.is_valid(raise_exception=True)
-            serializer.save
+            serializer.save()
+            serializer = SubscriptionSerializer(
+                author, context={'request': request}
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if not subscription.exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)

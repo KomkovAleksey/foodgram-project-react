@@ -119,6 +119,28 @@ class SubscriptionSerializer(CustomUserSerializer):
         return ShortRecipeSerializer(recipes, many=True, read_only=True).data
 
 
+class FollowSerializer(serializers.ModelSerializer):
+    """Serializer for model Follow."""
+
+    class Meta:
+        model = Follow
+        fields = ('user', 'author')
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=Follow.objects.all(),
+                fields=('user', 'author'),
+                message='You are already subscribed.'
+            )
+        ]
+
+    def validate(self, data):
+        """Self-subscription check."""
+        if self.context['request'].user == data['author']:
+            raise serializers.ValidationError('No self-subscription!')
+
+        return super().validate(data)
+
+
 class Hex2NameColor(serializers.Field):
     """Converts a color code to a color name."""
 

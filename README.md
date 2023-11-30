@@ -1,7 +1,8 @@
 ![status badge](https://github.com/KomkovAleksey/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 
 
-# [Foodgram_project](https://foodgrampromo.zapto.org/recipes)
+
+# 🍕 [Foodgram_project](https://foodgrampromo.zapto.org/recipes)
 
 
 ## Оглавление
@@ -221,7 +222,6 @@ http://localhost:80/
 ## Примеры запросов к API
 Все запросы делались в приложении [Postman](https://www.postman.com/)
 
-Создание пользователя:
 
 
 ## Автор

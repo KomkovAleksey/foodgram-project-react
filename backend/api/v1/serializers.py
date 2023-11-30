@@ -214,7 +214,6 @@ class AddIngredientSerializer(serializers.ModelSerializer):
     amount = serializers.IntegerField(
         min_value=ConstantRecipes.MIN_AMOUNT,
         max_value=ConstantRecipes.MAX_AMOUNT,
-        error_messages={'AMOUNT': 'Incorrect amount of ingredients!'},
     )
 
     class Meta:
@@ -315,32 +314,32 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         tags = data.get('tags')
         if not tags:
             raise serializers.ValidationError(
-                {'tags': 'You must select at least one tag.'}
+                'You must select at least one tag.'
             )
         if len(tags) != len(set(tags)):
             raise serializers.ValidationError(
-                {'tags': 'Tags should not be repeated!'}
+                'Tags should not be repeated!'
             )
 
         # Checking ingredients.
         ingredients = data.get('ingredients')
         if not ingredients:
             raise serializers.ValidationError(
-                {'ingredients': 'The ingredients field cannot be empty.'}
+                'The ingredients field cannot be empty.'
             )
         for ingredient in ingredients:
             ingredient_name = ingredient['id']
         if int(ingredient['amount']) <= ConstantRecipes.INCORRECT_AMOUNT:
             raise serializers.ValidationError(
-                {'ingredients': f'Incorrect quantity for {ingredient_name}'}
+                f'Incorrect quantity for {ingredient_name}'
             )
         if not isinstance(ingredient['amount'], int):
             raise serializers.ValidationError(
-                {'ingredients': 'must be a whole number!'}
+                'must be a whole number!'
             )
         if (len(set(item['id'] for item in ingredients)) != len(ingredients)):
             raise serializers.ValidationError(
-                {'ingredients': 'There can be no duplicate ingredients!'}
+                'There can be no duplicate ingredients!'
             )
 
         return super().validate(data)

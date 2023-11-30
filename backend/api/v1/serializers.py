@@ -152,7 +152,7 @@ class Hex2NameColor(serializers.Field):
             data = webcolors.hex_to_name(data)
         except ValueError:
             raise serializers.ValidationError(
-                {'Color name': 'There is no name for this color'}
+                'There is no name for this color'
             )
 
 

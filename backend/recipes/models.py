@@ -120,11 +120,11 @@ class Recipe(models.Model):
         validators=[
             MinValueValidator(
                 ConstantRecipes.MIN_COOKING_TIME,
-                {'Cooking time': 'Cooking time must be >=1 minute.'}
+                'Cooking time must be >=1 minute.'
             ),
             MaxValueValidator(
                 ConstantRecipes.MAX_COOKING_TIME,
-                {'Cooking time': 'Cooking time exceeds all norms!'}
+                'Cooking time exceeds all norms!'
             )
         ],
         help_text=HelpTextRecipes.RECIPE_COOKING_TIME,

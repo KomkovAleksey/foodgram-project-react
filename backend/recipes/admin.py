@@ -3,7 +3,6 @@ Module for registering "recipe" app models in the admin interface.
 """
 from django.contrib import admin
 from django.contrib.auth.models import Group
-from django.utils.safestring import mark_safe
 from rest_framework.authtoken.models import TokenProxy
 
 from .models import (

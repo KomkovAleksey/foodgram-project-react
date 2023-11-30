@@ -61,9 +61,7 @@ class CustomUserSerializer(UserSerializer):
 
         return (
             request and request.user.is_authenticated
-            and Follow.objects.filter(
-                user_id=request.user.id, author_id=obj.id
-            ).exists()
+            and request.user.follower.filter(author_id=obj.id).exists()
         )
 
 

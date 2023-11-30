@@ -114,7 +114,7 @@ class Follow(models.Model):
 
     def clean(self):
         """Subscription validation."""
-        if self.user == self.following:
+        if self.user == self.author:
             raise ValidationError('No self-subscription!')
 
     def __str__(self):

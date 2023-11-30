@@ -213,7 +213,11 @@ class AddIngredientSerializer(serializers.ModelSerializer):
     )
     amount = serializers.IntegerField(
         min_value=ConstantRecipes.MIN_AMOUNT,
+        error_messages={
+            'ingredient min': 'The number of ingredients must be >=1.'
+        },
         max_value=ConstantRecipes.MAX_AMOUNT,
+        error_messages={'ingredient max': 'Too many ingredients'},
     )
 
     class Meta:
@@ -340,12 +344,6 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         if (len(set(item['id'] for item in ingredients)) != len(ingredients)):
             raise serializers.ValidationError(
                 {'ingredients': 'There can be no duplicate ingredients!'}
-            )
-        # Checking recipe image.
-        image = data.get('image')
-        if not image:
-            raise serializers.ValidationError(
-                {'image': 'Add recipe images.'}
             )
 
         return super().validate(data)

@@ -117,7 +117,6 @@ class RecipeAdmin(admin.ModelAdmin):
         'name',
         'author',
         'get_favorites',
-        'get_image',
     )
     search_fields = (
         'name',
@@ -151,10 +150,6 @@ class RecipeAdmin(admin.ModelAdmin):
             f'{item.ingredient.measurement_unit}'
             for item in queryset
         ])
-
-    @admin.display(description='image')
-    def get_image(self, obj):
-        return mark_safe(f'<img src={obj.image.url} width="80" height="60">')
 
 
 @admin.register(Favorite)

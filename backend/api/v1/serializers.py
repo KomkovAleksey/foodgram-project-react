@@ -133,10 +133,15 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         """Self-subscription check."""
-        if self.context['request'].user == data['author']:
+        if data['user'] == data['author']:
             raise serializers.ValidationError('No self-subscription!')
 
         return super().validate(data)
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        context = {'request': request}
+        return SubscriptionSerializer(instance.author, context=context).data
 
 
 class Hex2NameColor(serializers.Field):
@@ -417,7 +422,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         request = self.context.get('request')
-        context = {'reauest': request}
+        context = {'request': request}
         return ShortRecipeSerializer(instance.recipe, context=context).data
 
 
@@ -444,5 +449,5 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         request = self.context.get('request')
-        context = {'reauest': request}
+        context = {'request': request}
         return ShortRecipeSerializer(instance.recipe, context=context).data

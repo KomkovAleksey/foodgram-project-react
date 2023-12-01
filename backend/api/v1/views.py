@@ -82,9 +82,6 @@ class CustomUserViewSet(UserViewSet):
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            serializer = SubscriptionSerializer(
-                author, context={'request': request}
-            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if not subscription.exists():
             return Response(status=status.HTTP_400_BAD_REQUEST)

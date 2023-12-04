@@ -141,6 +141,7 @@ class FollowSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         request = self.context.get('request')
         context = {'request': request}
+
         return SubscriptionSerializer(instance.author, context=context).data
 
 
@@ -423,6 +424,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         request = self.context.get('request')
         context = {'request': request}
+
         return ShortRecipeSerializer(instance.recipe, context=context).data
 
 
@@ -450,4 +452,5 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         request = self.context.get('request')
         context = {'request': request}
+
         return ShortRecipeSerializer(instance.recipe, context=context).data

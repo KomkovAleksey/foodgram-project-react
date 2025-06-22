@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 from core.constants import HelpTextUsers, ConstantUsers
-from core.validators import validate_username, UsernameInvChar
+from core.validators import validate_username, UsernameInvCharVal
 
 
 class CustomUser(AbstractUser):
@@ -39,7 +39,7 @@ class CustomUser(AbstractUser):
         help_text=HelpTextUsers.HELP_USERNAME,
         validators=(
             validate_username,
-            UsernameInvChar(),
+            UsernameInvCharVal(),
         )
     )
     first_name = models.CharField(
